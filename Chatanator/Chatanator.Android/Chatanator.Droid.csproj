@@ -57,6 +57,9 @@
     <PackageReference Include="Syncfusion.Xamarin.SfNavigationDrawer">
       <Version>16.1.0.37</Version>
     </PackageReference>
+    <PackageReference Include="Syncfusion.Xamarin.SfTabView">
+      <Version>16.1.0.37</Version>
+    </PackageReference>
     <PackageReference Include="Xamarin.Android.Support.Vector.Drawable">
       <Version>27.0.2</Version>
     </PackageReference>

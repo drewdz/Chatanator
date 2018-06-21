@@ -5,7 +5,7 @@ using System;
 
 namespace Chatanator.UI.Views
 {
-    [MvxNavigationPagePresentation(WrapInNavigationPage = true)]
+    [MvxMasterDetailPagePresentation(MasterDetailPosition.Master)]
 	public partial class SfView : MvxContentPage<SfViewModel>
 	{
 		public SfView ()

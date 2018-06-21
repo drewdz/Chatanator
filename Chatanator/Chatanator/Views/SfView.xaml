@@ -6,7 +6,8 @@
     xmlns:views="clr-namespace:MvvmCross.Forms.Views;assembly=MvvmCross.Forms"
     xmlns:viewModels="clr-namespace:Chatanator.Core.ViewModels;assembly=Chatanator.Core"
     xmlns:sf="clr-namespace:Syncfusion.SfNavigationDrawer.XForms;assembly=Syncfusion.SfNavigationDrawer.XForms"
-    x:Class="Chatanator.UI.Views.SfView">
+    x:Class="Chatanator.UI.Views.SfView"
+    Title="Chatanator">
 
     <sf:SfNavigationDrawer 
         x:Name="navigationDrawer" 
@@ -50,6 +51,17 @@
                     TextColor="Black"/>
             </Grid>
         </sf:SfNavigationDrawer.ContentView>
+        <sf:SfNavigationDrawer.DrawerContentView>
+            <StackLayout>
+                <Button
+                    Text="Chat"
+                    Command="{Binding ChatCommand}"/>
+                <Button
+                    Text="Tabs"
+                    Command="{Binding TabCommand}"/>
+
+            </StackLayout>
+        </sf:SfNavigationDrawer.DrawerContentView>
     </sf:SfNavigationDrawer>
 
 </views:MvxContentPage>

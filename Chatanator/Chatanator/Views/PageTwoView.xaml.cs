@@ -4,11 +4,10 @@ using MvvmCross.Forms.Views;
 
 namespace Chatanator.UI.Views
 {
-    //[MvxContentPagePresentation(WrapInNavigationPage = true, Animated = true, NoHistory = true, Title = "Register")]
     [MvxMasterDetailPagePresentation(MasterDetailPosition.Detail)]
-    public partial class BasicChatView : MvxContentPage<BasicChatViewModel>
+	public partial class PageTwoView : MvxContentPage<PageTwoViewModel>
 	{
-		public BasicChatView ()
+		public PageTwoView ()
 		{
 			InitializeComponent ();
 		}

@@ -10,6 +10,7 @@ namespace Chatanator.iOS
         public override bool FinishedLaunching(UIApplication uiApplication, NSDictionary launchOptions)
         {
             new Syncfusion.SfNavigationDrawer.XForms.iOS.SfNavigationDrawerRenderer();
+            Syncfusion.XForms.iOS.TabView.SfTabViewRenderer.Init();
             return base.FinishedLaunching(uiApplication, launchOptions);
         }
     }
