@@ -1,0 +1,49 @@
+﻿<UserControl
+    x:Class="PE.Plugins.Dialogs.WindowsCommon.Controls.CustomLoading"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    d:DesignHeight="300"
+    d:DesignWidth="400">
+
+    <Grid
+        x:Name="Grid">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="3*" />
+            <RowDefinition Height="3*" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="2*" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <Rectangle
+            Grid.RowSpan="4"
+            Grid.ColumnSpan="3" 
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch" 
+            Fill="#80000000"
+            />
+
+        <ProgressRing
+            Grid.Row="1"
+            Grid.Column="1"
+            IsActive="True"
+            Background="Transparent"
+            />
+
+        <TextBlock
+            x:Name="txtInfo"
+            Grid.Row="2"
+            Grid.ColumnSpan="3"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            />
+
+    </Grid>
+</UserControl>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+<svg xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns="http://www.w3.org/2000/svg" height="350" width="350" version="1.1" xmlns:cc="http://creativecommons.org/ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" viewBox="0 0 350.00001 350.00001">
+ <metadata>
+  <rdf:RDF>
+   <cc:Work rdf:about="">
+    <dc:format>image/svg+xml</dc:format>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:title/>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <g transform="translate(0 -702.36)">
+  <g transform="translate(-200.8 339.95)">
+   <g fill="#002b00">
+    <path d="m345.74 506.06h33.261v40.535h-33.261z"/>
+    <path d="m386.74 505.93h26.802v40.672h-26.802z"/>
+    <path d="m421.52 505.7h17.874v40.893h-17.874z"/>
+    <path d="m447.44 505.61h14.772v40.983h-14.772z"/>
+    <path d="m522.42 504.96v15.057c0.38739-0.17395 0.76922-0.34985 1.1621-0.52149v-14.535h-1.1621zm3.084 0v13.719c0.38309-0.15971 0.77362-0.31536 1.1621-0.47266v-13.246h-1.1621zm3.3106 0v12.387c0.37911-0.14506 0.77772-0.28124 1.1621-0.42383v-11.963h-1.1621zm3.8359 0v10.99c0.37932-0.13047 0.77954-0.25097 1.1641-0.3789v-10.611h-1.1641zm3.9121 0v9.7285c0.38932-0.11923 0.76937-0.24285 1.1641-0.35937v-9.3691h-1.1641zm-17.449 0.008v16.586c0.41268-0.19939 0.81164-0.40457 1.2305-0.60157v-15.984h-1.2305zm-5.1172 0.13086v19.053c0.90794-0.48421 1.8172-0.9687 2.7539-1.4434v-17.609h-2.7539zm-15.473 0.12305v28.018c1.5654-0.96841 3.1281-1.9376 4.7383-2.918v-25.1h-4.7383zm7.4473 0v23.469c1.543-0.91904 3.1251-1.8334 4.7383-2.7402v-20.729h-4.7383zm-22.434 0.24023v36.516c3.4657-1.7918 6.8474-3.7797 10.24-5.8438v-30.672h-10.24zm-15.094 0.0293v41.105h4.5996c2.2188-0.7975 4.3686-1.6851 6.4629-2.6504v-38.455h-11.062z"/>
+   </g>
+   <path d="m228.53 506.21 49.746-0.3195 51.63 0.1116c9.1594-0.24553 12.896 4.1518 12.987 15.737l-0.0911 48.125c-3.8571-11.602-10.528-23.214-22.238-23.036l-96.616-0.21555c-10.016 0.037-10.016-3.3579-9.97-10.056l-0.0926-20.709c0.0471-8.2144-0.36301-9.8267 14.644-9.6371z" fill-rule="evenodd" fill="#afa"/>
+   <text style="word-spacing:0px;letter-spacing:0px" line-height="125%" font-size="40px" y="540.35522" x="342.61084" font-family="sans-serif" xml:space="preserve" fill="#ffffff"><tspan y="540.35522" x="342.61084" font-family="&apos;Cooper Black&apos;" fill="#ffffff">ANATOR</tspan></text>
+   <text style="word-spacing:0px;letter-spacing:0px" line-height="125%" font-size="40px" y="540.35522" x="218.86086" font-family="sans-serif" xml:space="preserve" fill="#000000"><tspan y="540.35522" x="218.86086" font-family="&apos;Cooper Black&apos;" fill="#000000">CHAT</tspan></text>
+  </g>
+ </g>
+</svg>
