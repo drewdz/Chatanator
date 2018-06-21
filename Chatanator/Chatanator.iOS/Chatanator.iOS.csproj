@@ -89,14 +89,20 @@
     <CodesignEntitlements>Entitlements.plist</CodesignEntitlements>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Bootstrap\DialogsPluginBootstrap.cs" />
+    <Compile Include="Bootstrap\ValidationPluginBootstrap.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="AppDelegate.cs" />
+    <Compile Include="Setup.cs" />
     <None Include="Entitlements.plist" />
     <None Include="Info.plist" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <ImageAsset Include="Assets.xcassets\account.imageset\account.pdf">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Assets.xcassets\account.imageset\Contents.json">
       <Visible>false</Visible>
     </ImageAsset>
     <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\Icon1024.png">
@@ -138,7 +144,16 @@
     <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\Icon87.png">
       <Visible>false</Visible>
     </ImageAsset>
-    <ImageAsset Include="Assets.xcassets\account.imageset\Contents.json">
+    <ImageAsset Include="Assets.xcassets\menu.imageset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Assets.xcassets\menu_open.imageset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Assets.xcassets\menu.imageset\menu.pdf">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Assets.xcassets\menu_open.imageset\menu_open.pdf">
       <Visible>false</Visible>
     </ImageAsset>
     <InterfaceDefinition Include="Resources\LaunchScreen.storyboard" />
@@ -156,12 +171,21 @@
     <PackageReference Include="MvvmCross.Forms">
       <Version>6.0.1</Version>
     </PackageReference>
+    <PackageReference Include="Syncfusion.Xamarin.SfNavigationDrawer">
+      <Version>16.1.0.37</Version>
+    </PackageReference>
     <PackageReference Include="Xamarin.Forms" Version="3.0.0.446417" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Chatanator.Core\Chatanator.Core.csproj">
       <Project>{d0e3d5d9-6ce0-4878-998e-600b27f34d39}</Project>
       <Name>Chatanator.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Framework\PE.Framework.iOS\PE.Framework.iOS.csproj">
+      <Project>{094109d5-f8d6-447d-8f31-64ab5e700a0e}</Project>
+      <Name>PE.Framework.iOS</Name>
+      <IsAppExtension>false</IsAppExtension>
+      <IsWatchApp>false</IsWatchApp>
     </ProjectReference>
     <ProjectReference Include="..\..\Framework\PE.Framework\PE.Framework.csproj">
       <Project>{1061c09f-6cae-4b10-bc15-f029287ee4d0}</Project>
@@ -186,6 +210,10 @@
     <ProjectReference Include="..\..\Plugins\LocalStorage\PE.Plugins.LocalStorage\PE.Plugins.LocalStorage.csproj">
       <Project>{ba57ad1d-3645-4017-aedc-65d3b0f346a6}</Project>
       <Name>PE.Plugins.LocalStorage</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Plugins\Validation\PE.Plugins.Validation\PE.Plugins.Validation.csproj">
+      <Project>{16d42164-0c03-4741-8750-688fe7436730}</Project>
+      <Name>PE.Plugins.Validation</Name>
     </ProjectReference>
     <ProjectReference Include="..\Chatanator\Chatanator.UI.csproj">
       <Project>{e815d9ce-940d-49d3-b516-5ebb0a64adb4}</Project>

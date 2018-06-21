@@ -14,7 +14,7 @@ namespace Chatanator.Core
                 .AsInterfaces()
                 .RegisterAsLazySingleton();
 
-            RegisterAppStart<MainViewModel>();
+            RegisterAppStart<SfViewModel>();
         }
     }
 }

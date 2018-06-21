@@ -1,0 +1,55 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<views:MvxContentPage 
+    x:TypeArguments="viewModels:SfViewModel"
+    xmlns="http://xamarin.com/schemas/2014/forms"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:views="clr-namespace:MvvmCross.Forms.Views;assembly=MvvmCross.Forms"
+    xmlns:viewModels="clr-namespace:Chatanator.Core.ViewModels;assembly=Chatanator.Core"
+    xmlns:sf="clr-namespace:Syncfusion.SfNavigationDrawer.XForms;assembly=Syncfusion.SfNavigationDrawer.XForms"
+    x:Class="Chatanator.UI.Views.SfView">
+
+    <sf:SfNavigationDrawer 
+        x:Name="navigationDrawer" 
+        DrawerWidth ="200">
+        <sf:SfNavigationDrawer.ContentView>
+            <Grid 
+                x:Name="mainContentView" 
+                BackgroundColor="White">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <StackLayout 
+                    BackgroundColor="#1aa1d6" 
+                    Orientation="Horizontal">
+                    <Button 
+                        x:Name="hamburgerButton" 
+                        Image="menu"
+                        HeightRequest="50" 
+                        WidthRequest="50" 
+                        HorizontalOptions="Start" 
+                        FontSize="20" 
+                        BackgroundColor="#1aa1d6" />
+                    <Label 
+                        x:Name="headerLabel" 
+                        HeightRequest="50" 
+                        HorizontalTextAlignment="Center" 
+                        VerticalTextAlignment="Center" 
+                        Text="Home" 
+                        FontSize="16" 
+                        TextColor="White" 
+                        BackgroundColor="#1aa1d6"/>
+                </StackLayout>
+                <Label 
+                    Grid.Row="1" 
+                    x:Name="contentLabel" 
+                    VerticalOptions="Center" 
+                    HorizontalOptions="Center" 
+                    Text="Content View" 
+                    FontSize="14" 
+                    TextColor="Black"/>
+            </Grid>
+        </sf:SfNavigationDrawer.ContentView>
+    </sf:SfNavigationDrawer>
+
+</views:MvxContentPage>
