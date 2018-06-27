@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Runtime.Serialization;
 
 namespace Chatanator.Core.Models
@@ -11,25 +12,24 @@ namespace Chatanator.Core.Models
         Error
     }
 
-    [DataContract]
     public class BaseMessage
     {
-        [DataMember]
+        [JsonProperty("id")]
         public string Id { get; set; } = Guid.NewGuid().ToString();
 
-        [DataMember]
+        [JsonProperty]
+        public string ChannelId { get; set; }
+
+        [JsonProperty]
         public long TimeStamp { get; set; }
 
-        [DataMember]
+        [JsonProperty]
         public MessageStatus Status { get; set; } = MessageStatus.New;
 
-        [DataMember]
+        [JsonProperty]
         public string Type { get; set; }
 
-        [DataMember]
+        [JsonProperty]
         public string FromUser { get; set; }
-
-        [DataMember]
-        public string ToUser { get; set; }
     }
 }

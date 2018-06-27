@@ -10,14 +10,33 @@
 
     <views:MvxContentPage.Content>
         <StackLayout>
+            <!-- First name -->
             <Entry
-                Text="{Binding UserName}"
-                Placeholder="Enter a some unique user name."/>
+                Text="{Binding FirstName}"
+                Placeholder="First name, eg: Johnny."/>
 
             <Label
-                Text="{Binding UserNameInvalid}"
+                Text="{Binding FirstNameInvalid}"
                 TextColor="Red"/>
 
+            <!-- Last name -->
+            <Entry
+                Text="{Binding LastName}"
+                Placeholder="Last name, eg: Bravo."/>
+
+            <Label
+                Text="{Binding LastNameInvalid}"
+                TextColor="Red"/>
+
+            <!-- Email -->
+            <Entry
+                Text="{Binding Email}"
+                Placeholder="Email address, eg: johnny@bravo.com"/>
+
+            <Label
+                Text="{Binding EmailInvalid}"
+                TextColor="Red"/>
+            
             <Button
                 Text="Register"
                 Command="{Binding RegisterCommand}"/>

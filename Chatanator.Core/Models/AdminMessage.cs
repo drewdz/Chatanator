@@ -1,4 +1,5 @@
-﻿using System.Runtime.Serialization;
+﻿using Newtonsoft.Json;
+using System.Runtime.Serialization;
 
 namespace Chatanator.Core.Models
 {
@@ -11,8 +12,7 @@ namespace Chatanator.Core.Models
     /// <summary>
     /// This message is published in the lobby to request user information
     /// </summary>
-    [DataContract]
-    public class AdminMessage : BaseMessage
+    public class AdminMessage : BaseMessage, IIndexable
     {
         #region Constructors
 
@@ -25,14 +25,14 @@ namespace Chatanator.Core.Models
 
         #region Properties
 
-        [DataMember]
+        [JsonProperty]
         public AdminAction Action { get; set; }
 
-        [DataMember]
+        [JsonProperty]
         public ChatUser User { get; set; }
 
-        [DataMember]
-        public ChatChannel Channel { get; set; }
+        [JsonProperty]
+        public Channel Channel { get; set; }
 
         #endregion Properties
     }

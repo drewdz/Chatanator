@@ -1,10 +1,9 @@
-﻿using System;
+﻿using Newtonsoft.Json;
 using System.Runtime.Serialization;
 
 namespace Chatanator.Core.Models
 {
-    [DataContract]
-    public class ChatMessage : BaseMessage
+    public class ChatMessage : BaseMessage, IIndexable
     {
         #region Constructors
 
@@ -17,17 +16,17 @@ namespace Chatanator.Core.Models
 
         #region Properties
 
-        [DataMember]
+        [JsonProperty]
         public string Text { get; set; }
 
-        [DataMember]
-        public string ChannelId { get; set; }
+        [JsonProperty]
+        public string FromName { get; set; }
 
+        [JsonIgnore]
         public bool ShowStatus { get; set; } = false;
 
+        [JsonIgnore]
         public bool Sent { get; set; } = false;
-
-        public string FromName { get; set; }
 
         #endregion Properties
     }

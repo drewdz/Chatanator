@@ -51,6 +51,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Microsoft.Azure.DocumentDB.Core">
+      <Version>1.9.1</Version>
+    </PackageReference>
     <PackageReference Include="MvvmCross.Forms">
       <Version>6.0.1</Version>
     </PackageReference>

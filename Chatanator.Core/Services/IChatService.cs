@@ -8,12 +8,14 @@ namespace Chatanator.Core.Services
     {
         #region Events
 
+        event EventHandler InitializedChanged;
         event EventHandler ConnectedChanged;
         event EventHandler<MessageEventArgs<BaseMessage>> MessageReceived;
         event EventHandler<PresenceEventArgs> ChannelJoined;
         event EventHandler<PresenceEventArgs> ChannelLeft;
         event EventHandler<PresenceEventArgs> ChannelTimeout;
         event EventHandler<PresenceEventArgs> ChannelCreated;
+        event EventHandler<PresenceEventArgs> ChannelState;
 
         #endregion Events
 
@@ -21,11 +23,13 @@ namespace Chatanator.Core.Services
 
         bool Connected { get; }
 
-        List<ChatChannel> Channels { get; }
+        List<Channel> Channels { get; }
 
-        ChatChannel CurrentChannel { get; set; }
+        Channel CurrentChannel { get; set; }
 
         bool Initialized { get; }
+
+        Channel LobbyChannel { get; }
 
         #endregion Properties
 
@@ -33,13 +37,17 @@ namespace Chatanator.Core.Services
 
         void Initialize();
 
-        void Subscribe(ChatChannel channel);
+        void Subscribe(Channel channel);
 
         void Unsubscribe(string id);
 
         void Publish<TMessage>(string channel, TMessage message) where TMessage : BaseMessage;
 
         void GetState();
+
+        void GetHistory(Channel channel, long timeStamp);
+
+        void SetState(Channel channel, ChatState state);
 
         #endregion Operations
     }

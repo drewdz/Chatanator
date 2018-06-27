@@ -15,50 +15,24 @@
     </views:MvxContentPage.Resources>
 
     <views:MvxContentPage.Content>
-        <Grid>
+        <Grid
+            Padding="8">
 
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
                 <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
-            <Grid
-                Grid.Row="0"
-                BackgroundColor="DarkBlue"
-                HeightRequest="96">
-
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="96" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-
-                <Image
-                    Grid.Column="0"
-                    >
-                    <Image.Source>
-                        <OnPlatform x:TypeArguments="FileImageSource">
-                            <On Platform="Android" Value="account" />
-                            <On Platform="iOS" Value="account" />
-                            <On Platform="UWP" Value="Assets/account.png" />
-                        </OnPlatform>
-                    </Image.Source>
-                </Image>
-
-                <Label
-                    Margin="2,2,2,2"
-                    Grid.Column="1"
-                    VerticalOptions="CenterAndExpand"
-                    VerticalTextAlignment="Center"
-                    Text="{Binding ToUser.UserName}"
-                    TextColor="#ffffff"/>
-            </Grid>
+            <Label 
+                Text="{Binding ChannelName}" />
 
             <ListView
                 Grid.Row="1" 
                 ItemsSource="{Binding Messages}"
                 HasUnevenRows="True"
-                RowHeight="88"
+                RowHeight="48"
                 >
                 <ListView.ItemTemplate>
                     <DataTemplate>
@@ -66,15 +40,15 @@
                             <Grid
                                 Margin="{Binding Sent, Converter={StaticResource MessageMarginConverter}}" >
                                 <Grid.RowDefinitions>
-                                    <RowDefinition Height="24"/>
-                                    <RowDefinition Height="64"/>
+                                    <RowDefinition Height="16"/>
+                                    <RowDefinition Height="32"/>
                                 </Grid.RowDefinitions>
 
                                 <Label
                                     Grid.Row="0"
                                     Text="{Binding FromName}"
                                     HorizontalTextAlignment="{Binding Sent, Converter={StaticResource FromAlignmentConverter}}"
-                                    FontSize="Micro"
+                                    FontSize="8"
                                     TextColor="DarkGray"
                                     HorizontalOptions="Fill"/>
 
@@ -82,7 +56,7 @@
                                     Grid.Row="1"
                                     Text="{Binding Text}"
                                     TextColor="#000000"
-                                    FontSize="Medium"/>
+                                    FontSize="12"/>
 
                             </Grid>
                         </ViewCell>
@@ -110,6 +84,15 @@
                     />
 
             </Grid>
+
+            <Label
+                Grid.Row="3"
+                Text="{Binding StateMessage}"
+                TextColor="Gray"
+                FontAttributes="Italic"
+                FontSize="8"
+                HorizontalOptions="EndAndExpand"
+                HorizontalTextAlignment="End"/>
         </Grid>
     </views:MvxContentPage.Content>
 

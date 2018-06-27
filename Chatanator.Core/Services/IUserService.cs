@@ -1,4 +1,5 @@
 ﻿using Chatanator.Core.Models;
+using System.Threading.Tasks;
 
 namespace Chatanator.Core.Services
 {
@@ -14,7 +15,7 @@ namespace Chatanator.Core.Services
 
         #region Operations
 
-        void Register(ChatUser user);
+        Task RegisterAsync(ChatUser user);
 
         #endregion Operations
     }

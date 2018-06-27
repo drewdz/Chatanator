@@ -1,0 +1,6 @@
+﻿CREATE TABLE ChannelUser
+(
+	ChannelUserId		BIGINT		IDENTITY(1, 1)			NOT NULL		CONSTRAINT pkChannelUser PRIMARY KEY WITH FILLFACTOR = 80,
+	ChatUserId			BIGINT								NOT NULL		CONSTRAINT fkChannelUser FOREIGN KEY REFERENCES ChatUser(ChatUserId),
+)
+GO

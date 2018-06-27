@@ -4,6 +4,8 @@ using PE.Plugins.LocalStorage;
 using PE.Plugins.Validation;
 
 using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Chatanator.Core.Services
 {
@@ -13,15 +15,17 @@ namespace Chatanator.Core.Services
 
         private readonly ILocalStorageService _StorageService;
         private readonly IValidationService _ValidationService;
+        private readonly ICosmosDataService _DataService;
 
         #endregion Fields
 
         #region Constructors
 
-        public UserService(ILocalStorageService storageService, IValidationService validationService)
+        public UserService(ILocalStorageService storageService, IValidationService validationService, ICosmosDataService dataService)
         {
             _StorageService = storageService;
             _ValidationService = validationService;
+            _DataService = dataService;
             Initialize();
         }
 
@@ -33,7 +37,7 @@ namespace Chatanator.Core.Services
 
         public bool Initialized
         {
-            get { return ((User != null) && !string.IsNullOrEmpty(User.UserName)); }
+            get { return ((User != null) && !string.IsNullOrEmpty(User.Id)); }
         }
 
         #endregion Properties
@@ -50,23 +54,26 @@ namespace Chatanator.Core.Services
             {
                 System.Diagnostics.Debug.WriteLine(string.Format("*** UserService.Initialize - Exception: {0}", ex));
             }
+
             if (User == null)
-                {
-                    User = new ChatUser { Id = Guid.NewGuid().ToString() };
-                }
-                else
-                {
-                    User.Initialized = true;
-                }
+            {
+                User = new ChatUser { Id = string.Empty };
+            }
+            else
+            {
+                User.Initialized = true;
+            }
         }
 
         #endregion Init
 
         #region Operations
 
-        public void Register(ChatUser user)
+        public async Task RegisterAsync(ChatUser user)
         {
-            if ((user == null) || (user.UserName == null) || string.IsNullOrEmpty(user.UserName.Trim())) throw new ArgumentException("Could not register without a name.");
+            //  save the new user
+            await _DataService.AddAsync(user);
+            //  set up
             User = user;
             User.Initialized = true;
             //  save 

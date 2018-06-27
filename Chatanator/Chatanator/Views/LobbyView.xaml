@@ -1,0 +1,56 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<views:MvxContentPage 
+    x:TypeArguments="viewModels:LobbyViewModel"
+    xmlns="http://xamarin.com/schemas/2014/forms"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:views="clr-namespace:MvvmCross.Forms.Views;assembly=MvvmCross.Forms"
+    xmlns:mvx="clr-namespace:MvvmCross.Forms.Bindings;assembly=MvvmCross.Forms"
+    xmlns:viewModels="clr-namespace:Chatanator.Core.ViewModels;assembly=Chatanator.Core"
+    xmlns:converters="clr-namespace:Chatanator.UI.ValueConverters;assembly=Chatanator.UI"
+    x:Class="Chatanator.UI.Views.LobbyView">
+
+    <views:MvxContentPage.Resources>
+        <ResourceDictionary>
+            <converters:NotConverter x:Key="NotConverter" />
+            <converters:AvailableColorConverter x:Key="AvailableColorConverter" />
+            <converters:FontNewContentConverter x:Key="FontNewContentConverter" />
+        </ResourceDictionary>
+    </views:MvxContentPage.Resources>
+
+    <views:MvxContentPage.Content>
+        <Grid
+            Padding="8">
+            <ListView
+                ItemsSource="{Binding Contacts}"
+                SelectedItem="{Binding Contact}"
+                IsVisible="{Binding IsEmpty, Converter={StaticResource NotConverter}}">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <ViewCell>
+                            <StackLayout>
+                                <Label
+                                    Text="{Binding Fullname}"
+                                    TextColor="{Binding Available, Converter={StaticResource AvailableColorConverter}}"
+                                    FontAttributes="{Binding NewContent, Converter={StaticResource FontNewContentConverter}}"
+                                    FontSize="Medium"/>
+                                <Label
+                                    Text="{Binding State}"
+                                    TextColor="Gray"
+                                    FontAttributes="Italic"
+                                    FontSize="8"
+                                    HorizontalOptions="EndAndExpand"
+                                    HorizontalTextAlignment="End"/>
+                            </StackLayout>
+                        </ViewCell>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+            <Label
+                IsVisible="{Binding IsEmpty}"
+                Text="No one has arrived yet."
+                HorizontalOptions="CenterAndExpand"
+                HorizontalTextAlignment="Center"/>
+        </Grid>
+    </views:MvxContentPage.Content>
+
+</views:MvxContentPage>

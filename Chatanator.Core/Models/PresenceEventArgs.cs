@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Chatanator.Core.Services;
+using System;
 
 namespace Chatanator.Core.Models
 {
@@ -6,10 +7,11 @@ namespace Chatanator.Core.Models
     {
         #region Constructors
 
-        public PresenceEventArgs(string channel, string uuid)
+        public PresenceEventArgs(string channel, string uuid, ChatState state = ChatState.None)
         {
             Channel = channel;
             Uuid = uuid;
+            State = state;
         }
 
         #endregion Constructors
@@ -19,6 +21,8 @@ namespace Chatanator.Core.Models
         public string Channel { get; set; }
 
         public string Uuid { get; set; }
+
+        public ChatState State { get; set; }
 
         #endregion Properties
     }
