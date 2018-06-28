@@ -48,7 +48,6 @@ namespace Chatanator.Core.Services
                 await client.CreateDocumentCollectionIfNotExistsAsync(dbPath, new DocumentCollection { Id = typeof(ChatUser).Name }, new RequestOptions { OfferThroughput = 400 });
                 await client.CreateDocumentCollectionIfNotExistsAsync(dbPath, new DocumentCollection { Id = typeof(Channel).Name }, new RequestOptions { OfferThroughput = 400 });
                 await client.CreateDocumentCollectionIfNotExistsAsync(dbPath, new DocumentCollection { Id = typeof(ChannelHistory).Name }, new RequestOptions { OfferThroughput = 400 });
-                await client.CreateDocumentCollectionIfNotExistsAsync(dbPath, new DocumentCollection { Id = typeof(ChannelUser).Name }, new RequestOptions { OfferThroughput = 400 });
                 await client.CreateDocumentCollectionIfNotExistsAsync(dbPath, new DocumentCollection { Id = typeof(ChatMessage).Name }, new RequestOptions { OfferThroughput = 400 });
             }
             _Initialized = true;
@@ -68,11 +67,6 @@ namespace Chatanator.Core.Services
         public async Task<List<Channel>> GetChannelsAsync()
         {
             return await GetItemsAsync<Channel>();
-        }
-
-        public async Task<List<ChannelUser>> GetChannelUsersAsync()
-        {
-            return await GetItemsAsync<ChannelUser>();
         }
 
         public async Task<List<ChannelHistory>> GetChannelHistoryAsync()

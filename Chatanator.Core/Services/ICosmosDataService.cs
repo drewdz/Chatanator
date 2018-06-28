@@ -13,8 +13,6 @@ namespace Chatanator.Core.Services
 
         Task<List<Channel>> GetChannelsAsync();
 
-        Task<List<ChannelUser>> GetChannelUsersAsync();
-
         Task<List<ChannelHistory>> GetChannelHistoryAsync();
 
 

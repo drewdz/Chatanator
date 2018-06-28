@@ -14,6 +14,7 @@
             <converters:NotConverter x:Key="NotConverter" />
             <converters:AvailableColorConverter x:Key="AvailableColorConverter" />
             <converters:FontNewContentConverter x:Key="FontNewContentConverter" />
+            <converters:StateConverter x:Key="StateConverter" />
         </ResourceDictionary>
     </views:MvxContentPage.Resources>
 
@@ -34,10 +35,10 @@
                                     FontAttributes="{Binding NewContent, Converter={StaticResource FontNewContentConverter}}"
                                     FontSize="Medium"/>
                                 <Label
-                                    Text="{Binding State}"
+                                    Text="{Binding State, Converter={StaticResource StateConverter}}"
                                     TextColor="Gray"
                                     FontAttributes="Italic"
-                                    FontSize="8"
+                                    FontSize="10"
                                     HorizontalOptions="EndAndExpand"
                                     HorizontalTextAlignment="End"/>
                             </StackLayout>

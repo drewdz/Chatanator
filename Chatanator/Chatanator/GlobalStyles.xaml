@@ -7,6 +7,7 @@
     <!-- Fonts -->
     <OnPlatform x:Key="SecondaryFont" x:TypeArguments="x:String" iOS="HelveticaNeue" Android="" />
     <OnPlatform x:Key="SecondaryFontBold" x:TypeArguments="x:String" iOS="HelveticaNeue-Bold" Android="" />
+    <OnPlatform x:Key="StateFont" x:TypeArguments="Font" Android="8" iOS="8" Default="12"  />
 
     <!-- Colors -->
     <Color x:Key="DarkGrey">#333</Color>
