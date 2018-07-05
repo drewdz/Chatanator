@@ -1,8 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
-using System.Runtime.Serialization;
 
-namespace Chatanator.Core.Models
+namespace PE.Plugins.PubnubChat.Models
 {
     public enum MessageStatus
     {

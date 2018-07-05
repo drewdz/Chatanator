@@ -1,13 +1,12 @@
 ﻿using PE.Plugins.PubnubChat.Models;
+
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Chatanator.Core.Services
+namespace PE.Plugins.PubnubChat
 {
-    public interface ICosmosDataService
+    public interface IDataService
     {
-        #region Operations
-
         Task<List<ChatUser>> GetChatUsersAsync();
 
         Task<List<Channel>> GetChannelsAsync();
@@ -24,6 +23,5 @@ namespace Chatanator.Core.Services
 
         Task UpdateAsync<TItem>(TItem item) where TItem : IIndexable;
 
-        #endregion Operations
     }
 }

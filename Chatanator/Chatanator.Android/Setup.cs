@@ -2,10 +2,8 @@
 using MvvmCross.Binding.Bindings.Target.Construction;
 using MvvmCross.Droid.Support.V7.AppCompat;
 using MvvmCross.Forms.Platforms.Android.Core;
-using MvvmCross.Platform.Droid;
 using MvvmCross.Plugin;
-using PE.Framework.AndroidApp.AppVersion;
-using PE.Framework.Droid.AppVersion;
+using PE.Framework.Droid.AndroidApp.AppVersion;
 using System;
 
 namespace Chatanator.Droid

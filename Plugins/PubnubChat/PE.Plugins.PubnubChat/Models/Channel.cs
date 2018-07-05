@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Chatanator.Core.Models
+namespace PE.Plugins.PubnubChat.Models
 {
     public enum ChannelType
     {

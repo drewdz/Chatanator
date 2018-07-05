@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace Chatanator.Core.Models
+namespace PE.Plugins.PubnubChat.Models
 {
     public interface IIndexable
     {

@@ -1,8 +1,8 @@
-﻿using Chatanator.Core.Models;
+﻿using PE.Plugins.PubnubChat.Models;
 using System;
 using System.Collections.Generic;
 
-namespace Chatanator.Core.Services
+namespace PE.Plugins.PubnubChat
 {
     public interface IChatService
     {
@@ -35,7 +35,7 @@ namespace Chatanator.Core.Services
 
         #region Operations
 
-        void Initialize();
+        void Initialize(string userId, IDataService dataService);
 
         void Subscribe(Channel channel);
 

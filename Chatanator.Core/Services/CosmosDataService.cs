@@ -1,4 +1,4 @@
-﻿using Chatanator.Core.Models;
+﻿using PE.Plugins.PubnubChat.Models;
 using Microsoft.Azure.Documents;
 using Microsoft.Azure.Documents.Client;
 using Microsoft.Azure.Documents.Linq;
@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Chatanator.Core.Services
 {
-    public class CosmosDataService : ICosmosDataService
+    public class CosmosDataService : ICosmosDataService, PE.Plugins.PubnubChat.IDataService
     {
         #region Constants
 

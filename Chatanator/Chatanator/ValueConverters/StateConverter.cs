@@ -1,4 +1,4 @@
-﻿using Chatanator.Core.Services;
+﻿using PE.Plugins.PubnubChat;
 using System;
 using System.Globalization;
 using Xamarin.Forms;

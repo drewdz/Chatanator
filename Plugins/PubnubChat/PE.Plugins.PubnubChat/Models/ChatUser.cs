@@ -1,10 +1,9 @@
-﻿using Chatanator.Core.Services;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace Chatanator.Core.Models
+namespace PE.Plugins.PubnubChat.Models
 {
     public class ChatUser : IIndexable, INotifyPropertyChanged
     {

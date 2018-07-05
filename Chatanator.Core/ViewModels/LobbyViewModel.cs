@@ -1,4 +1,4 @@
-﻿using Chatanator.Core.Models;
+﻿using PE.Plugins.PubnubChat.Models;
 using Chatanator.Core.Services;
 
 using MvvmCross.Navigation;
@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using PE.Plugins.PubnubChat;
 
 namespace Chatanator.Core.ViewModels
 {
@@ -106,7 +107,7 @@ namespace Chatanator.Core.ViewModels
                     //  get a list of channel occupants
                     _ChatService.GetState();
                 };
-                _ChatService.Initialize();
+                _ChatService.Initialize(_UserService.User.Id, (IDataService)_DataService);
             });
         }
 

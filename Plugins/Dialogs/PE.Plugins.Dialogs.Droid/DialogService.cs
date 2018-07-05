@@ -1,13 +1,13 @@
 ﻿using Android.App;
 using Android.Content;
 using Android.Widget;
-using MvvmCross;
-using PE.Framework.Droid;
 
+using MvvmCross;
+using MvvmCross.Platform.Droid.Platform;
+using PE.Framework.Droid;
+using PE.Framework.Droid.AndroidApp.AppVersion;
 using System;
 using System.Threading.Tasks;
-using MvvmCross.Platform.Droid.Platform;
-using PE.Framework.AndroidApp.AppVersion;
 
 namespace PE.Plugins.Dialogs.Droid
 {

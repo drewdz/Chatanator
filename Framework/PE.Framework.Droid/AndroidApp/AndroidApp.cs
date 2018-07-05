@@ -1,6 +1,4 @@
-﻿using PE.Framework.AndroidApp.AppVersion;
-
-namespace PE.Framework.Droid.AppVersion
+﻿namespace PE.Framework.Droid.AndroidApp.AppVersion
 {
 	public class AndroidApp : IAndroidApp
 	{

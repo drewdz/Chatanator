@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System.Runtime.Serialization;
 
-namespace Chatanator.Core.Models
+namespace PE.Plugins.PubnubChat.Models
 {
     public class ChatMessage : BaseMessage, IIndexable
     {

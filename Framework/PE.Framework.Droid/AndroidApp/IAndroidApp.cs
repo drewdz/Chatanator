@@ -1,5 +1,6 @@
 ﻿using System;
-namespace PE.Framework.AndroidApp.AppVersion
+
+namespace PE.Framework.Droid.AndroidApp.AppVersion
 {
     public interface IAndroidApp
     {

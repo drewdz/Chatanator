@@ -1,4 +1,4 @@
-﻿using Chatanator.Core.Models;
+﻿using PE.Plugins.PubnubChat.Models;
 
 using PE.Plugins.LocalStorage;
 using PE.Plugins.Validation;

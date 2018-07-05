@@ -5,8 +5,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MvvmCross.Forms" Version="6.0.1" />
-    <PackageReference Include="Xamarin.Forms" Version="3.0.0.446417" />
+    <PackageReference Include="MvvmCross.Forms" Version="6.1.2" />
+    <PackageReference Include="Xamarin.Forms" Version="3.1.0.583944" />
   </ItemGroup>
 
   <ItemGroup>
@@ -14,6 +14,7 @@
     <ProjectReference Include="..\..\Framework\PE.Framework\PE.Framework.csproj" />
     <ProjectReference Include="..\..\Plugins\Dialogs\PE.Plugins.Dialogs\PE.Plugins.Dialogs.csproj" />
     <ProjectReference Include="..\..\Plugins\LocalStorage\PE.Plugins.LocalStorage\PE.Plugins.LocalStorage.csproj" />
+    <ProjectReference Include="..\..\Plugins\PubnubChat\PE.Plugins.PubnubChat\PE.Plugins.PubnubChat.csproj" />
     <ProjectReference Include="..\..\Plugins\Validation\PE.Plugins.Validation\PE.Plugins.Validation.csproj" />
   </ItemGroup>
 

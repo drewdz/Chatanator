@@ -1,4 +1,4 @@
-﻿using Chatanator.Core.Models;
+﻿using PE.Plugins.PubnubChat.Models;
 using Chatanator.Core.Services;
 using MvvmCross.Commands;
 using MvvmCross.Navigation;

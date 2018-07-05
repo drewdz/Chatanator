@@ -1,4 +1,4 @@
-﻿using Chatanator.Core.Models;
+﻿using PE.Plugins.PubnubChat.Models;
 using System.Threading.Tasks;
 
 namespace Chatanator.Core.Services

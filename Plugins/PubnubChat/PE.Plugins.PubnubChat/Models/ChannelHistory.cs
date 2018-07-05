@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace Chatanator.Core.Models
+namespace PE.Plugins.PubnubChat.Models
 {
     public class ChannelHistory : IIndexable
     {

@@ -1,7 +1,6 @@
-﻿using Chatanator.Core.Services;
-using System;
+﻿using System;
 
-namespace Chatanator.Core.Models
+namespace PE.Plugins.PubnubChat.Models
 {
     public class PresenceEventArgs : EventArgs
     {

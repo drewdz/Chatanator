@@ -1,11 +1,13 @@
-﻿using Chatanator.Core.Models;
-using PE.Framework.Serialization;
+﻿using PE.Framework.Serialization;
+using PE.Plugins.PubnubChat.Models;
+
 using PubnubApi;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Chatanator.Core.Services
+namespace PE.Plugins.PubnubChat
 {
     public enum ChatState
     {
@@ -38,11 +40,11 @@ namespace Chatanator.Core.Services
 
         #region Fields
 
-        private readonly IUserService _UserService;
-        private readonly ICosmosDataService _DataService;
+        private readonly string _PublishKey = string.Empty;
+        private readonly string _SubscribeKey = string.Empty;
 
-        private readonly string _KeyPublish = "pub-c-4d9191a2-eb1a-4015-8554-1d3179be699e";
-        private readonly string _KeySubscribe = "sub-c-45047c26-6330-11e8-8176-12d6db7070d8";
+        private IDataService _DataService;
+        private string _UserId = string.Empty;
 
         private Pubnub _Pubnub;
         private bool _Disposed = false;
@@ -51,11 +53,10 @@ namespace Chatanator.Core.Services
 
         #region Constructors
 
-        public ChatService(IUserService userService, ICosmosDataService dataService)
+        public ChatService(ChatConfiguration configuration)
         {
-            //  TODO: provide keys via setup
-            _UserService = userService;
-            _DataService = dataService;
+            _PublishKey = configuration.PublishKey;
+            _SubscribeKey = configuration.SubscribeKey;
         }
 
         ~ChatService()
@@ -81,12 +82,15 @@ namespace Chatanator.Core.Services
 
         #region Init
 
-        public async void Initialize()
+        public async void Initialize(string userId, IDataService dataService)
         {
             try
             {
+                _DataService = dataService;
+
                 //  we can only initialize if the user is registered
-                if (!_UserService.Initialized || Initialized) return;
+                if (string.IsNullOrEmpty(userId)) return;
+                _UserId = userId;
 
                 //  get the lobby channel
                 var channels = await _DataService.GetChannelsAsync();
@@ -101,9 +105,9 @@ namespace Chatanator.Core.Services
                 if (Channels.FirstOrDefault(ch => ch.Id.Equals(CH_LOBBY)) == null) Channels.Add(LobbyChannel);
 
                 PNConfiguration config = new PNConfiguration();
-                config.PublishKey = _KeyPublish;
-                config.SubscribeKey = _KeySubscribe;
-                config.Uuid = _UserService.User.Id;
+                config.PublishKey = _PublishKey;
+                config.SubscribeKey = _SubscribeKey;
+                config.Uuid = _UserId;
                 config.Secure = true;
 
                 _Pubnub = new Pubnub(config);
@@ -112,13 +116,13 @@ namespace Chatanator.Core.Services
                 {
                     try
                     {
-                    //  get the message base to determine type
-                    BaseMessage m = Serializer.Deserialize<BaseMessage>(message.Message.ToString());
-                    //  deserialize to actual type
-                    m = (BaseMessage)Serializer.Deserialize(GetType().Assembly.GetType(m.Type), message.Message.ToString());
+                        //  get the message base to determine type
+                        BaseMessage m = Serializer.Deserialize<BaseMessage>(message.Message.ToString());
+                        //  deserialize to actual type
+                        m = (BaseMessage)Serializer.Deserialize(GetType().Assembly.GetType(m.Type), message.Message.ToString());
                         m.ChannelId = message.Channel;
-                    //  let listeners know
-                    MessageReceived?.Invoke(this, new MessageEventArgs<BaseMessage>(m));
+                        //  let listeners know
+                        MessageReceived?.Invoke(this, new MessageEventArgs<BaseMessage>(m));
                     }
                     catch (Exception ex)
                     {
@@ -126,8 +130,8 @@ namespace Chatanator.Core.Services
                     }
                 }, (pubnubObj, presence) =>
                 {
-                // handle incoming presence data 
-                if (presence.Event.Equals("join"))
+                    // handle incoming presence data 
+                    if (presence.Event.Equals("join"))
                     {
                         RaiseChannelJoined(presence.Channel, presence.Uuid);
                     }
@@ -139,7 +143,7 @@ namespace Chatanator.Core.Services
                     {
                         //  listen for status events - eg: typing, etc
                         if ((presence.State == null) || (presence.State.Count == 0)) return;
-                        foreach  (var key in presence.State.Keys)
+                        foreach (var key in presence.State.Keys)
                         {
                             var state = (ChatState)Enum.Parse(typeof(ChatState), presence.State[key].ToString());
                             RaiseChannelState(presence.Channel, presence.Uuid, state);
@@ -150,8 +154,8 @@ namespace Chatanator.Core.Services
                     }
                     else if (presence.Event.Equals("interval"))
                     {
-                    //  find the ids that have joined
-                    if ((presence.Join != null) && (presence.Join.Length > 0))
+                        //  find the ids that have joined
+                        if ((presence.Join != null) && (presence.Join.Length > 0))
                         {
                             foreach (var uuid in presence.Join) RaiseChannelJoined(presence.Channel, uuid);
                         }
@@ -178,27 +182,27 @@ namespace Chatanator.Core.Services
 
                     if (status.Category == PNStatusCategory.PNConnectedCategory)
                     {
-                    // this is expected for a subscribe, this means there is no error or issue whatsoever
-                }
+                        // this is expected for a subscribe, this means there is no error or issue whatsoever
+                    }
                     else if (status.Category == PNStatusCategory.PNReconnectedCategory)
                     {
-                    // this usually occurs if subscribe temporarily fails but reconnects. This means
-                    // there was an error but there is no longer any issue
-                }
+                        // this usually occurs if subscribe temporarily fails but reconnects. This means
+                        // there was an error but there is no longer any issue
+                    }
                     else if (status.Category == PNStatusCategory.PNDisconnectedCategory)
                     {
-                    // this is the expected category for an unsubscribe. This means there
-                    // was no error in unsubscribing from everything
-                }
+                        // this is the expected category for an unsubscribe. This means there
+                        // was no error in unsubscribing from everything
+                    }
                     else if (status.Category == PNStatusCategory.PNUnexpectedDisconnectCategory)
                     {
-                    // this is usually an issue with the internet connection, this is an error, handle appropriately
-                }
+                        // this is usually an issue with the internet connection, this is an error, handle appropriately
+                    }
                     else if (status.Category == PNStatusCategory.PNAccessDeniedCategory)
                     {
-                    // this means that PAM does allow this client to subscribe to this
-                    // channel and channel group configuration. This is another explicit error
-                }
+                        // this means that PAM does allow this client to subscribe to this
+                        // channel and channel group configuration. This is another explicit error
+                    }
                 });
 
                 _Pubnub.AddListener(listenerSubscribeCallack);
@@ -258,13 +262,13 @@ namespace Chatanator.Core.Services
                         if ((result.Messages == null) || (result.Messages.Count == 0)) return;
                         foreach (var message in result.Messages)
                         {
-                        //  get the message base to determine type
-                        BaseMessage m = Serializer.Deserialize<BaseMessage>(message.Entry.ToString());
-                        //  deserialize to actual type
-                        m = (BaseMessage)Serializer.Deserialize(GetType().Assembly.GetType(m.Type), message.Entry.ToString());
+                            //  get the message base to determine type
+                            BaseMessage m = Serializer.Deserialize<BaseMessage>(message.Entry.ToString());
+                            //  deserialize to actual type
+                            m = (BaseMessage)Serializer.Deserialize(GetType().Assembly.GetType(m.Type), message.Entry.ToString());
                             m.ChannelId = channel.Id;
-                        //  let listeners know
-                        MessageReceived?.Invoke(this, new MessageEventArgs<BaseMessage>(m));
+                            //  let listeners know
+                            MessageReceived?.Invoke(this, new MessageEventArgs<BaseMessage>(m));
                         }
                     }));
             }
@@ -298,7 +302,7 @@ namespace Chatanator.Core.Services
                 if (string.IsNullOrEmpty(channel)) throw new ArgumentException("Cannot publish without first subscribing.");
 
                 //  make sure we know who it's from
-                message.FromUser = _UserService.User.Id;
+                message.FromUser = _UserId;
                 message.ChannelId = channel;
                 //  get message as payload
                 var payload = Serializer.Serialize(message);
@@ -309,8 +313,8 @@ namespace Chatanator.Core.Services
                     .Async(new PNPublishResultExt((result, status) =>
                     {
                         if (message == null) return;
-                    //  get the message
-                    message.Status = (status.Error) ? MessageStatus.Error : MessageStatus.Delivered;
+                        //  get the message
+                        message.Status = (status.Error) ? MessageStatus.Error : MessageStatus.Delivered;
                         message.TimeStamp = result.Timetoken;
                     }));
             }
@@ -349,7 +353,7 @@ namespace Chatanator.Core.Services
                             {
                                 foreach (var occupant in channel.Value.Occupants)
                                 {
-                                    if (occupant.Uuid.Equals(_UserService.User.Id))
+                                    if (occupant.Uuid.Equals(_UserId))
                                     {
                                         //  only add this channel if i'm in there
                                         RaiseChannelCreated(channel.Value.ChannelName, string.Empty);
@@ -359,7 +363,7 @@ namespace Chatanator.Core.Services
                             }
                         }
                     }));
-            } 
+            }
             catch (Exception ex)
             {
                 //  TODO: some analytics

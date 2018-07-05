@@ -4,9 +4,7 @@ using Android.Runtime;
 
 using MvvmCross;
 using MvvmCross.Platforms.Android.Views;
-
-using PE.Framework.AndroidApp.AppVersion;
-
+using PE.Framework.Droid.AndroidApp.AppVersion;
 using System;
 
 using static Android.App.Application;

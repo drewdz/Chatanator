@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Chatanator.Core.Models
+namespace PE.Plugins.PubnubChat.Models
 {
     public class MessageEventArgs<TMessageType> : EventArgs
     {
