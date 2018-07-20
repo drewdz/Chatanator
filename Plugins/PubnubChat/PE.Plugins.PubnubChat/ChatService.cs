@@ -21,7 +21,8 @@ namespace PE.Plugins.PubnubChat
     {
         #region Constants
 
-        public const string CH_LOBBY = "Lobby";
+        public const string CH_LOBBY = "L{0}";
+        public const string CH_GROUP = "G{0}";
 
         #endregion Constants
 
@@ -43,8 +44,10 @@ namespace PE.Plugins.PubnubChat
         private readonly string _PublishKey = string.Empty;
         private readonly string _SubscribeKey = string.Empty;
 
-        private IDataService _DataService;
         private string _UserId = string.Empty;
+
+        private string _Group = string.Empty;
+        private long _LastActivity = 0;
 
         private Pubnub _Pubnub;
         private bool _Disposed = false;
@@ -70,8 +73,6 @@ namespace PE.Plugins.PubnubChat
 
         public bool Connected { get; private set; }
 
-        public List<Channel> Channels { get; private set; } = new List<Channel>();
-
         public Channel CurrentChannel { get; set; }
 
         public bool Initialized { get; private set; } = false;
@@ -82,27 +83,18 @@ namespace PE.Plugins.PubnubChat
 
         #region Init
 
-        public async void Initialize(string userId, IDataService dataService)
+        public void Initialize(string userId, long lastActivity = 0)
         {
             try
             {
-                _DataService = dataService;
+                _LastActivity = lastActivity;
 
                 //  we can only initialize if the user is registered
                 if (string.IsNullOrEmpty(userId)) return;
                 _UserId = userId;
 
-                //  get the lobby channel
-                var channels = await _DataService.GetChannelsAsync();
-                LobbyChannel = channels.FirstOrDefault(ch => ch.Id.Equals(CH_LOBBY));
-                if (LobbyChannel == null)
-                {
-                    //  create the lobby
-                    LobbyChannel = new Channel { Id = CH_LOBBY, Name = CH_LOBBY };
-                    await _DataService.AddAsync(LobbyChannel);
-                }
-                if (LobbyChannel == null) throw new Exception("Could not create or retrieve the Lobby.");
-                if (Channels.FirstOrDefault(ch => ch.Id.Equals(CH_LOBBY)) == null) Channels.Add(LobbyChannel);
+                _Group = string.Format(CH_GROUP, _UserId);
+                LobbyChannel = new Channel { Id = string.Format(CH_LOBBY, userId), Name = "Lobby" };
 
                 PNConfiguration config = new PNConfiguration();
                 config.PublishKey = _PublishKey;
@@ -166,7 +158,8 @@ namespace PE.Plugins.PubnubChat
                     }
                     else if (presence.HereNowRefresh)
                     {
-                        GetState();
+                        //  TODO: request state for channels
+                        //GetState();
                     }
                 }, (pubnubObj, status) =>
                 {
@@ -206,10 +199,20 @@ namespace PE.Plugins.PubnubChat
                 });
 
                 _Pubnub.AddListener(listenerSubscribeCallack);
-                //  by default everyone is subscribed to the lobby (each org can have their own lobby?)
-                Subscribe(LobbyChannel);
-                //  get all channels
-                GetState();
+
+                //  create and subscribe to the lobby channel
+                _Pubnub
+                    .Subscribe<string>()
+                    .Channels(new string[] { LobbyChannel.Id })
+                    .WithPresence()
+                    .Execute();
+
+                //  now we subscribe to the group
+                //_Pubnub.Subscribe<string>()
+                //    .ChannelGroups(new string[] { _Group })
+                //    .WithPresence()
+                //    .Execute();
+
                 Initialized = true;
                 InitializedChanged?.Invoke(this, new EventArgs());
             }
@@ -223,29 +226,49 @@ namespace PE.Plugins.PubnubChat
 
         #region Operations
 
+        public void AddChannelToGroup(List<Channel> channels)
+        {
+            if (!Initialized || (channels == null) || (channels.Count == 0)) return;
+
+            var ids = channels.Select(c => c.Id).ToArray();
+            _Pubnub
+                .AddChannelsToChannelGroup()
+                .ChannelGroup(_Group)
+                .Channels(ids)
+                .Async(new PNChannelGroupsAddChannelResultExt((result, status) =>
+                {
+                    if (status.Error)
+                    {
+                        //  TODO: could not add channel?? Analytics
+                        System.Diagnostics.Debug.WriteLine(string.Format("*** ChatService.AddChannelToGroup - Error {0}", ids));
+                    }
+                }));
+        }
+
+        public void RemoveFromGroup(List<Channel> channels)
+        {
+            if ((channels == null) || (channels.Count == 0)) return;
+
+            _Pubnub.RemoveChannelsFromChannelGroup()
+                .ChannelGroup(_Group)
+                .Channels(channels.Select(ch => ch.Id).ToArray())
+                .Async(new PNChannelGroupsRemoveChannelResultExt(
+                    (result, status) => 
+                    {
+                        //  TODO: Analytics?
+                    }
+                ));
+        }
+
         public void Subscribe(Channel channel)
         {
-            try
-            {
-                //  not ready
-                if (!Initialized) return;
-                lock (Channels)
-                {
-                    if (!Channels.Contains(channel)) Channels.Add(channel);
-
-                    var channels = Channels.Select(c => c.Id).ToArray();
-
-                    _Pubnub
-                        .Subscribe<string>()
-                        .Channels(channels)
-                        .WithPresence()
-                        .Execute();
-                }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine(string.Format("*** ChatService.Subscribe - Exception: {0}", ex));
-            }
+            //  not ready
+            if (!Initialized) return;
+            _Pubnub
+                .Subscribe<string>()
+                    .Channels(new string[] { channel.Id })
+                    .WithPresence()
+                    .Execute();
         }
 
         public void GetHistory(Channel channel, long timeStamp)
@@ -282,11 +305,8 @@ namespace PE.Plugins.PubnubChat
         {
             try
             {
-                var channel = Channels.FirstOrDefault(c => c.Id.Equals(id));
-                if (channel == null) return;
                 //  unsubscribe
                 _Pubnub.Unsubscribe<string>().Channels(new string[] { id }).Execute();
-                Channels.Remove(channel);
             }
             catch (Exception ex)
             {
@@ -298,7 +318,6 @@ namespace PE.Plugins.PubnubChat
         {
             try
             {
-                //  can't publish to the lobby and we can only publish to subscribed channels
                 if (string.IsNullOrEmpty(channel)) throw new ArgumentException("Cannot publish without first subscribing.");
 
                 //  make sure we know who it's from
@@ -327,13 +346,15 @@ namespace PE.Plugins.PubnubChat
         /// <summary>
         /// Gets a list of all users and all channels
         /// </summary>
-        public void GetState()
+        public void GetState(string channelId)
         {
-            //  TODO: consider doing this per channel
+            if (string.IsNullOrEmpty(channelId)) return;
+
             try
             {
                 if (_Pubnub == null) return;
                 _Pubnub.HereNow()
+                    .Channels(new string[] { channelId })
                     .IncludeState(true)
                     .IncludeUUIDs(true)
                     .Async(new PNHereNowResultEx((result, status) =>
@@ -342,7 +363,7 @@ namespace PE.Plugins.PubnubChat
 
                         foreach (var channel in result.Channels)
                         {
-                            if (channel.Value.ChannelName.Equals(CH_LOBBY))
+                            if (channel.Value.ChannelName.Equals(LobbyChannel.Id))
                             {
                                 foreach (var occupant in channel.Value.Occupants)
                                 {
@@ -351,12 +372,12 @@ namespace PE.Plugins.PubnubChat
                             }
                             else
                             {
+                                RaiseChannelCreated(channel.Value.ChannelName, string.Empty);
                                 foreach (var occupant in channel.Value.Occupants)
                                 {
-                                    if (occupant.Uuid.Equals(_UserId))
+                                    if (!occupant.Uuid.Equals(_UserId))
                                     {
-                                        //  only add this channel if i'm in there
-                                        RaiseChannelCreated(channel.Value.ChannelName, string.Empty);
+                                        RaiseChannelJoined(channel.Value.ChannelName, occupant.Uuid);
                                         break;
                                     }
                                 }
@@ -373,10 +394,11 @@ namespace PE.Plugins.PubnubChat
 
         public void SetState(Channel channel, ChatState state)
         {
+            if (channel == null) return;
             try
             {
                 _Pubnub.SetPresenceState()
-                    .Channels(Channels.Select(ch => ch.Id).ToArray())
+                    .Channels(new string[] { channel.Id })
                     .State(new Dictionary<string, object> { { "State", state } })
                     .Async(new PNSetStateResultExt((result, status) =>
                     {

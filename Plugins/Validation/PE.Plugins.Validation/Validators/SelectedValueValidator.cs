@@ -21,6 +21,8 @@
 
         public override bool IsValid(object value)
         {
+            if (value == null) return false;
+            
             string v = value.ToString();
 
             if (string.IsNullOrEmpty(v)) return false;

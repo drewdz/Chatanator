@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using PE.Plugins.PubnubChat;
+using Chatanator.Core.Extensions;
 
 namespace Chatanator.Core.ViewModels
 {
@@ -17,9 +18,10 @@ namespace Chatanator.Core.ViewModels
         #region Fields
 
         private readonly IMvxNavigationService _NavigationService;
-        private readonly ICosmosDataService _DataService;
+        private readonly IDataService _DataService;
         private readonly IUserService _UserService;
         private readonly IChatService _ChatService;
+        private readonly IAppService _AppService;
 
         private long _StateTimestamp = 0;
 
@@ -27,12 +29,13 @@ namespace Chatanator.Core.ViewModels
 
         #region Constructors
 
-        public LobbyViewModel(IMvxNavigationService navigationService, ICosmosDataService dataService, IUserService userService, IChatService chatService)
+        public LobbyViewModel(IMvxNavigationService navigationService, IDataService dataService, IUserService userService, IChatService chatService, IAppService appService)
         {
             _NavigationService = navigationService;
             _DataService = dataService;
             _UserService = userService;
             _ChatService = chatService;
+            _AppService = appService;
 
             _ChatService.ChannelCreated += _ChatService_ChannelCreated;
             _ChatService.ChannelJoined += _ChatService_ChannelJoined;
@@ -46,8 +49,8 @@ namespace Chatanator.Core.ViewModels
 
         #region Properties
 
-        private MvxObservableCollection<ChatUser> _Contacts = new MvxObservableCollection<ChatUser>();
-        public MvxObservableCollection<ChatUser> Contacts
+        private List<ChatUser> _Contacts = new List<ChatUser>();
+        public List<ChatUser> Contacts
         {
             get => _Contacts;
             set => SetProperty(ref _Contacts, value);
@@ -61,7 +64,7 @@ namespace Chatanator.Core.ViewModels
             {
                 SetProperty(ref _Contact, value);
                 if (value == null) return;
-                BeginChat(value);
+                Task.Run(() => BeginChatAsync(value));
                 //  reset so we can reselect
                 Contact = null;
             }
@@ -72,6 +75,13 @@ namespace Chatanator.Core.ViewModels
         {
             get => _IsEmpty;
             set => SetProperty(ref _IsEmpty, value);
+        }
+
+        private string _Username = string.Empty;
+        public string Username
+        {
+            get => _Username;
+            set => SetProperty(ref _Username, value);
         }
 
         #endregion Properties
@@ -87,8 +97,9 @@ namespace Chatanator.Core.ViewModels
                     await _NavigationService.Navigate<RegisterViewModel>();
                     return;
                 }
+                Username = _UserService.User.ToString();
                 //  get a list of contacts
-                var contacts = await _DataService.GetChatUsersAsync();
+                var contacts = _DataService.GetChatUsers();
                 if (contacts != null)
                 {
                     foreach (var contact in contacts)
@@ -102,12 +113,10 @@ namespace Chatanator.Core.ViewModels
                 _ChatService.InitializedChanged += (sender, e) =>
                 {
                     if (!_ChatService.Initialized) return;
-                    //  subscribe this user to the lobby
-                    _ChatService.Subscribe(_ChatService.LobbyChannel);
-                    //  get a list of channel occupants
-                    _ChatService.GetState();
+                    //  get activity for recent channels since last
+                    GetHistory(_AppService.LastActivity);
                 };
-                _ChatService.Initialize(_UserService.User.Id, (IDataService)_DataService);
+                _ChatService.Initialize(_UserService.User.Id);
             });
         }
 
@@ -116,12 +125,12 @@ namespace Chatanator.Core.ViewModels
             base.ViewDisappearing();
 
             //  unsubscribe event handlers
-            _ChatService.ChannelCreated -= _ChatService_ChannelCreated;
-            _ChatService.ChannelJoined -= _ChatService_ChannelJoined;
-            _ChatService.ChannelLeft -= _ChatService_ChannelLeft;
-            _ChatService.ConnectedChanged -= _ChatService_ConnectedChanged;
-            _ChatService.MessageReceived -= _ChatService_MessageReceived;
-            _ChatService.ChannelState -= _ChatService_ChannelState;
+            //_ChatService.ChannelCreated -= _ChatService_ChannelCreated;
+            //_ChatService.ChannelJoined -= _ChatService_ChannelJoined;
+            //_ChatService.ChannelLeft -= _ChatService_ChannelLeft;
+            //_ChatService.ConnectedChanged -= _ChatService_ConnectedChanged;
+            //_ChatService.MessageReceived -= _ChatService_MessageReceived;
+            //_ChatService.ChannelState -= _ChatService_ChannelState;
         }
 
         #endregion Lifecycle
@@ -135,44 +144,34 @@ namespace Chatanator.Core.ViewModels
         private void _ChatService_ChannelLeft(object sender, PresenceEventArgs e)
         {
             //  we want to know when someone has joined the lobby
-            if (!e.Channel.Equals(_ChatService.LobbyChannel.Id)) return;
+            if (!e.Channel.Equals(_ChatService.LobbyChannel?.Id)) return;
             SetContactStatus(e.Uuid, false);
         }
 
         private void _ChatService_ChannelJoined(object sender, PresenceEventArgs e)
         {
             //  we want to know when someone has joined the lobby
-            if (!e.Channel.Equals(_ChatService.LobbyChannel.Id)) return;
+            if (!e.Channel.Equals(_ChatService.LobbyChannel?.Id)) return;
             //  find this user in the list
             SetContactStatus(e.Uuid, true);
         }
 
         private void _ChatService_ChannelCreated(object sender, PresenceEventArgs e)
         {
+            //  get the channel from the backend and see if I'm in it
+                        
         }
 
         private void _ChatService_MessageReceived(object sender, MessageEventArgs<BaseMessage> e)
         {
-            if (!(e.Message is ChatMessage)) return;
-            //  not interesting in messages in the lobby
-            if (e.Message.ChannelId.Equals(ChatService.CH_LOBBY)) return;
-            //  find the channel
-            var channel = _ChatService.Channels.FirstOrDefault(ch => ch.Id.Equals(e.Message.ChannelId));
-            if (channel == null)
+            if (e.Message is AdminMessage)
             {
-                //  TODO: create a channel
-                System.Diagnostics.Debug.WriteLine(string.Format("*** LobbyViewModel.~MessageReceived - Unknown channel {0}", e.Message.ChannelId));
-                return;
+                ProcessAdminMessage((AdminMessage)e.Message);
             }
-            //  find the contact that this message is from
-            var userId = channel.Users.FirstOrDefault(s => !s.Equals(_UserService.User.Id));
-            if (string.IsNullOrEmpty(userId))
+            else if (e.Message is ChatMessage)
             {
-                System.Diagnostics.Debug.WriteLine(string.Format("*** LobbyViewModel.~MessageReceived - Could not find userid !{0} - {1}", _UserService.User.Id, channel.UsersKey));
-                return;
+                ProcessChatMessage((ChatMessage)e.Message);
             }
-            var contact = Contacts.FirstOrDefault(c => c.Id.Equals(userId));
-            contact.NewContent = true;
         }
 
         private async void _ChatService_ChannelState(object sender, PresenceEventArgs e)
@@ -194,7 +193,27 @@ namespace Chatanator.Core.ViewModels
 
         #region Operations
 
-        private async void SetContactStatus(string id, bool available)
+        private void GetHistory(long lastActivity)
+        {
+            try
+            {
+                //  get channel history from storage
+                var histories = _DataService.GetChannelHistoriesByTimestampGreater(lastActivity - (new TimeSpan(30, 0, 0).Ticks)).ToList();
+                if (histories == null) return;
+                //  add channels that have been active in the last 30 days
+                foreach (var history in histories)
+                {
+                    //_ChatService.AddChannelToGroup(new List<Channel> { _DataService.GetChannelById(history.ChannelId) });
+                    _ChatService.Subscribe(_DataService.GetChannelById(history.ChannelId));
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine(string.Format("***  LobbyViewModel.GetHistory - Exception: {0}", ex));
+            }
+        }
+
+        private void SetContactStatus(string id, bool available)
         {
             try
             {
@@ -206,21 +225,8 @@ namespace Chatanator.Core.ViewModels
                 {
                     contact.Available = available;
                 }
-                else
-                {
-                    //  see if this contact is now in the db then add it
-                    var contacts = await _DataService.GetChatUsersAsync();
-                    contact = contacts.FirstOrDefault(c => c.Id.Equals(id));
-                    if (contact == null)
-                    {
-                        System.Diagnostics.Debug.WriteLine(string.Format("*** LobbyViewModel.SetContactStatus - Could not find new user {0}", id));
-                        return;
-                    }
-                    contact.Available = available;
-                    Contacts.Add(contact);
-                }
-                //  get all channels (this should be parameterized to limit results for optimization)
-                var channels = await _DataService.GetChannelsAsync();
+                //  get all channels
+                var channels = _DataService.GetChannels().ToList();
                 if ((channels == null) || (channels.Count == 0)) return;
                 //  create a users key
                 var list = new List<string> { _UserService.User.Id, id }.OrderBy(s => s).ToList();
@@ -232,8 +238,7 @@ namespace Chatanator.Core.ViewModels
                 //  subscribe to this channel
                 _ChatService.Subscribe(channel);
                 //  get history for this channel
-                var histories = await _DataService.GetChannelHistoryAsync();
-                var history = histories.FirstOrDefault(h => h.ChannelId.Equals(channel.Id));
+                var history = _DataService.GetChannelHistoryByChannelId(channel.Id);
                 if (history == null) return;
                 //  get messages sent after the last time one we read
                 _ChatService.GetHistory(channel, history.TimeStamp);
@@ -244,21 +249,68 @@ namespace Chatanator.Core.ViewModels
             }
         }
 
-        private async void BeginChat(ChatUser user)
+        private async Task BeginChatAsync(ChatUser user)
         {
             //  find the channel for this user
-            var channels = await _DataService.GetChannelsAsync();
-            var channel = channels.FirstOrDefault(ch => (ch.ChannelType == ChannelType.Individual) && (ch.Users != null) && ch.Users.Contains(user.Id) && ch.Users.Contains(_UserService.User.Id));
+            var channel = _DataService.GetChannelForUsers(_UserService.User.Id, user.Id);
             if (channel == null)
             {
                 channel = new Channel { Id = Guid.NewGuid().ToString(), Name = user.Fullname, ChannelType = ChannelType.Individual, Users = new string[] { _UserService.User.Id, user.Id } };
-                await _DataService.AddAsync(channel);
+                channel.Save(_DataService);
             }
+            //  notify OP that we intend to chat - on OP Lobby
+            _ChatService.Publish(string.Format(ChatService.CH_LOBBY, user.Id), new AdminMessage { Action = AdminAction.Invite, ChannelId = channel.Id, User = _UserService.User, Channel = channel });
             //  make sure we're subscribed to this channel
+            //_ChatService.AddChannelToGroup(new List<Channel> { channel });
             _ChatService.Subscribe(channel);
             //  select and view
             _ChatService.CurrentChannel = channel;
             await _NavigationService.Navigate<BasicChatViewModel>();
+        }
+
+        private void ProcessAdminMessage(AdminMessage message)
+        {
+            //  new user
+            if (message.Action == AdminAction.Hello )
+            {
+                var contact = Contacts.FirstOrDefault(c => c.Id.Equals(message.User.Id));
+                if (contact != null) return;
+                //  add the contact
+                Contacts.Add(message.User);
+                message.User.Save(_DataService);
+            }
+            else if (message.Action== AdminAction.Invite)
+            {
+                //  make sure both users are in the channel
+                message.Channel.Save(_DataService);
+                //  subscribe to this channel
+                _ChatService.Subscribe(message.Channel);
+            }
+        }
+
+        private void ProcessChatMessage(ChatMessage message)
+        {
+            //  not interesting in messages in the lobby
+            //  this should never happen
+            if (message.ChannelId.Equals(ChatService.CH_LOBBY)) return;
+            //  find the channel
+            //var channel = _ChatService.Channels.FirstOrDefault(ch => ch.Id.Equals(message.ChannelId));
+            var channel = _DataService.GetChannelById(message.ChannelId);
+            if (channel == null)
+            {
+                //  TODO: create a channel
+                System.Diagnostics.Debug.WriteLine(string.Format("*** LobbyViewModel.~MessageReceived - Unknown channel {0}", message.ChannelId));
+                return;
+            }
+            //  find the contact that this message is from
+            var userId = channel.Users.FirstOrDefault(s => !s.Equals(_UserService.User.Id));
+            if (string.IsNullOrEmpty(userId))
+            {
+                System.Diagnostics.Debug.WriteLine(string.Format("*** LobbyViewModel.~MessageReceived - Could not find userid !{0} - {1}", _UserService.User.Id, channel.UsersKey));
+                return;
+            }
+            var contact = Contacts.FirstOrDefault(c => c.Id.Equals(userId));
+            contact.NewContent = true;
         }
 
         #endregion Operations

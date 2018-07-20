@@ -1,13 +1,17 @@
-﻿using PE.Plugins.PubnubChat.Models;
+﻿using Chatanator.Core.Extensions;
 using Chatanator.Core.Services;
+
 using MvvmCross.Commands;
 using MvvmCross.Navigation;
 using MvvmCross.ViewModels;
+
 using PE.Plugins.Dialogs;
+using PE.Plugins.PubnubChat.Models;
 using PE.Plugins.Validation;
 using PE.Plugins.Validation.Validators;
+
 using System;
-using System.Linq;
+using System.Collections.Generic;
 
 namespace Chatanator.Core.ViewModels
 {
@@ -19,13 +23,13 @@ namespace Chatanator.Core.ViewModels
         private readonly IValidationService _ValidationService;
         private readonly IDialogService _DialogService;
         private readonly IMvxNavigationService _NavigationService;
-        private readonly ICosmosDataService _DataService;
+        private readonly IDataService _DataService;
 
         #endregion Fields
 
         #region Constructors
 
-        public RegisterViewModel(IUserService userService, IValidationService validationService, IDialogService dialogService, IMvxNavigationService navigationService, ICosmosDataService dataService)
+        public RegisterViewModel(IUserService userService, IValidationService validationService, IDialogService dialogService, IMvxNavigationService navigationService, IDataService dataService)
         {
             _UserService = userService;
             _ValidationService = validationService;
@@ -38,107 +42,39 @@ namespace Chatanator.Core.ViewModels
 
         #region Properties
 
-        #region FirstName
-
-        private string _FirstName = string.Empty;
-        [RequiredValidator(Message = "First name is required.")]
-        public string FirstName
+        private List<ChatUser> _Users = null;
+        public List<ChatUser> Users
         {
-            get => _FirstName;
+            get => _Users;
+            set => SetProperty(ref _Users, value);
+        }
+
+        private ChatUser _User = null;
+        [SelectedValueValidator("", Message = "Be somebody... If you can't be batman, then be yourself!")]
+        public ChatUser User
+        {
+            get => _User;
+            set => SetProperty(ref _User, value);
+        }
+
+        private string _UserInvalid = string.Empty;
+        public string UserInvalid
+        {
+            get => _UserInvalid;
             set
             {
-                SetProperty(ref _FirstName, value);
-                _ValidationService.Validate(this, () => FirstName);
+                SetProperty(ref _UserInvalid, value);
+                UserIsValid = string.IsNullOrEmpty(value);
             }
         }
 
-        private string _FirstNameInvalid = string.Empty;
-        public string FirstNameInvalid
+        private bool _UserIsValid = true;
+        public bool UserIsValid
         {
-            get => _FirstNameInvalid;
-            set
-            {
-                SetProperty(ref _FirstNameInvalid, value);
-                FirstNameIsValid = string.IsNullOrEmpty(value);
-            }
+            get => _UserIsValid;
+            set => SetProperty(ref _UserIsValid, value);
         }
 
-        private bool _FirstNameIsValid = true;
-        public bool FirstNameIsValid
-        {
-            get => _FirstNameIsValid;
-            set => SetProperty(ref _FirstNameIsValid, value);
-        }
-
-        #endregion FirstName
-
-        #region LastName
-
-        private string _LastName = string.Empty;
-        [RequiredValidator(Message = "Last name is required.")]
-        public string LastName
-        {
-            get => _LastName;
-            set
-            {
-                SetProperty(ref _LastName, value);
-                _ValidationService.Validate(this, () => LastName);
-            }
-        }
-
-        private string _LastNameInvalid = string.Empty;
-        public string LastNameInvalid
-        {
-            get => _LastNameInvalid;
-            set
-            {
-                SetProperty(ref _LastNameInvalid, value);
-                LastNameIsValid = string.IsNullOrEmpty(value);
-            }
-        }
-
-        private bool _LastNameIsValid = true;
-        public bool LastNameIsValid
-        {
-            get => _LastNameIsValid;
-            set => SetProperty(ref _LastNameIsValid, value);
-        }
-
-        #endregion LastName
-
-        #region Email
-
-        private string _Email = string.Empty;
-        [RequiredValidator(Message = "Email is required.")]
-        public string Email
-        {
-            get => _Email;
-            set
-            {
-                SetProperty(ref _Email, value);
-                _ValidationService.Validate(this, () => Email);
-            }
-        }
-
-        private string _EmailInvalid = string.Empty;
-        public string EmailInvalid
-        {
-            get => _EmailInvalid;
-            set
-            {
-                SetProperty(ref _EmailInvalid, value);
-                EmailIsValid = string.IsNullOrEmpty(value);
-            }
-        }
-
-        private bool _EmailIsValid = true;
-        public bool EmailIsValid
-        {
-            get => _EmailIsValid;
-            set => SetProperty(ref _EmailIsValid, value);
-        }
-
-        #endregion Email
 
         #endregion Properties
 
@@ -149,6 +85,15 @@ namespace Chatanator.Core.ViewModels
 
         #endregion Commands
 
+        #region Lifecycle
+
+        public override void ViewAppeared()
+        {
+            Users = _DataService.CreateUsers();
+        }
+
+        #endregion Lifecycle
+
         #region Actions
 
         private async void Register()
@@ -157,26 +102,10 @@ namespace Chatanator.Core.ViewModels
             {
                 //  validate
                 if (!_ValidationService.Validate(this)) return;
-                var user = _UserService.User;
-                if (user == null)
-                {
-                    //  create the user
-                    user = new ChatUser { FirstName = FirstName, LastName = LastName, Email = Email };
-                    user.Id = Guid.NewGuid().ToString();
-                }
-                else
-                {
-                    if (string.IsNullOrEmpty(user.Id)) user.Id = Guid.NewGuid().ToString();
-                    //  update
-                    user.FirstName = FirstName;
-                    user.LastName = LastName;
-                    user.Email = Email;
-                }
                 //  register
-                await _UserService.RegisterAsync(user);
+                await _UserService.RegisterAsync(User);
                 //  all done
-                //await _NavigationService.Close(this);
-                await _NavigationService.Navigate<LobbyViewModel>();
+                if  (!_NavigationService.Close(this).Result) await _NavigationService.Navigate<LobbyViewModel>();
             }
             catch (Exception ex)
             {

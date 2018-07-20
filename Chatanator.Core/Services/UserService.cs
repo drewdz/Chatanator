@@ -1,10 +1,9 @@
-﻿using PE.Plugins.PubnubChat.Models;
+﻿using Chatanator.Core.Extensions;
 
-using PE.Plugins.LocalStorage;
+using PE.Plugins.PubnubChat.Models;
 using PE.Plugins.Validation;
 
 using System;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Chatanator.Core.Services
@@ -13,19 +12,19 @@ namespace Chatanator.Core.Services
     {
         #region Fields
 
-        private readonly ILocalStorageService _StorageService;
         private readonly IValidationService _ValidationService;
-        private readonly ICosmosDataService _DataService;
+        private readonly IDataService _DataService;
+        private readonly IAppService _AppService;
 
         #endregion Fields
 
         #region Constructors
 
-        public UserService(ILocalStorageService storageService, IValidationService validationService, ICosmosDataService dataService)
+        public UserService(IValidationService validationService, IDataService dataService, IAppService appService)
         {
-            _StorageService = storageService;
             _ValidationService = validationService;
             _DataService = dataService;
+            _AppService = appService;
             Initialize();
         }
 
@@ -48,7 +47,11 @@ namespace Chatanator.Core.Services
         {
             try
             {
-                User = _StorageService.Get<ChatUser>("UserSetup");
+                User = _DataService.GetAppUser();
+                //  get usage
+                var usage = _DataService.GetAppUsage();
+                if (usage == null) return;
+                _AppService.LastActivity = usage.LastActivity;
             }
             catch (Exception ex)
             {
@@ -72,12 +75,10 @@ namespace Chatanator.Core.Services
         public async Task RegisterAsync(ChatUser user)
         {
             //  save the new user
-            await _DataService.AddAsync(user);
+            user.SaveAppUser(_DataService);
             //  set up
             User = user;
             User.Initialized = true;
-            //  save 
-            _StorageService.Put("UserSetup", User);
         }
 
         #endregion Operations

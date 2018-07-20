@@ -21,7 +21,14 @@
     <views:MvxContentPage.Content>
         <Grid
             Padding="8">
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="24" />
+            </Grid.RowDefinitions>
+            
             <ListView
+                Grid.Row="0"
                 ItemsSource="{Binding Contacts}"
                 SelectedItem="{Binding Contact}"
                 IsVisible="{Binding IsEmpty, Converter={StaticResource NotConverter}}">
@@ -47,10 +54,19 @@
                 </ListView.ItemTemplate>
             </ListView>
             <Label
+                Grid.Row="0"
                 IsVisible="{Binding IsEmpty}"
                 Text="No one has arrived yet."
                 HorizontalOptions="CenterAndExpand"
                 HorizontalTextAlignment="Center"/>
+
+            <Label
+                Grid.Row="1"
+                Text="{Binding Username}"
+                FontSize="8"
+                TextColor="Gray"
+                HorizontalTextAlignment="Center"
+                HorizontalOptions="CenterAndExpand"/>
         </Grid>
     </views:MvxContentPage.Content>
 

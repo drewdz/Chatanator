@@ -23,8 +23,6 @@ namespace PE.Plugins.PubnubChat
 
         bool Connected { get; }
 
-        List<Channel> Channels { get; }
-
         Channel CurrentChannel { get; set; }
 
         bool Initialized { get; }
@@ -35,7 +33,7 @@ namespace PE.Plugins.PubnubChat
 
         #region Operations
 
-        void Initialize(string userId, IDataService dataService);
+        void Initialize(string userId, long lastActivity = 0);
 
         void Subscribe(Channel channel);
 
@@ -43,11 +41,15 @@ namespace PE.Plugins.PubnubChat
 
         void Publish<TMessage>(string channel, TMessage message) where TMessage : BaseMessage;
 
-        void GetState();
+        void GetState(string channel = "");
 
         void GetHistory(Channel channel, long timeStamp);
 
         void SetState(Channel channel, ChatState state);
+
+        void AddChannelToGroup(List<Channel> channels);
+
+        void RemoveFromGroup(List<Channel> channels);
 
         #endregion Operations
     }

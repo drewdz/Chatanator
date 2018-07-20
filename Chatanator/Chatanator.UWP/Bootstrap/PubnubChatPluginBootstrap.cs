@@ -1,12 +1,13 @@
 ﻿using MvvmCross.Platform.Plugins;
 
 using PE.Plugins.PubnubChat;
+using Windows.UI.Xaml;
 
 namespace Chatanator.UWP.Bootstrap
 {
     public class PubnubChatPluginBootstrap : MvxPluginBootstrapAction<PE.Plugins.PubnubChat.Plugin>
     {
-        public static MvvmCross.Plugin.IMvxPluginConfiguration Configure()
+        public static MvvmCross.Plugin.IMvxPluginConfiguration Configure(Window window)
         {
             return new ChatConfiguration
             {

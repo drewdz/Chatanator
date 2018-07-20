@@ -115,6 +115,11 @@ namespace PE.Plugins.PubnubChat.Models
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
 
+        public override string ToString()
+        {
+            return string.Format("{0} {1}", FirstName, LastName);
+        }
+
         #endregion Helpers
     }
 }

@@ -4,9 +4,10 @@ namespace Chatanator.Core.Services
 {
     public interface IAppService
     {
-        #region Events
+        #region Properties
 
+        long LastActivity { get; set; }
 
-        #endregion Events
+        #endregion Properties
     }
 }

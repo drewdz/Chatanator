@@ -9,32 +9,19 @@
     x:Class="Chatanator.UI.Views.RegisterView">
 
     <views:MvxContentPage.Content>
-        <StackLayout>
-            <!-- First name -->
-            <Entry
-                Text="{Binding FirstName}"
-                Placeholder="First name, eg: Johnny."/>
+        <StackLayout
+            Margin="8">
 
             <Label
-                Text="{Binding FirstNameInvalid}"
-                TextColor="Red"/>
-
-            <!-- Last name -->
-            <Entry
-                Text="{Binding LastName}"
-                Placeholder="Last name, eg: Bravo."/>
+                Text="Who do you wanna be?"/>
+            
+            <Picker
+                ItemsSource="{Binding Users}"
+                SelectedItem="{Binding User}"/>
 
             <Label
-                Text="{Binding LastNameInvalid}"
-                TextColor="Red"/>
-
-            <!-- Email -->
-            <Entry
-                Text="{Binding Email}"
-                Placeholder="Email address, eg: johnny@bravo.com"/>
-
-            <Label
-                Text="{Binding EmailInvalid}"
+                Text="{Binding UserInvalid}"
+                FontSize="10"
                 TextColor="Red"/>
             
             <Button

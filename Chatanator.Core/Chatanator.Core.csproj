@@ -5,35 +5,18 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Models\AdminMessage.cs" />
-    <Compile Remove="Models\BaseMessage.cs" />
-    <Compile Remove="Models\Channel.cs" />
-    <Compile Remove="Models\ChannelHistory.cs" />
-    <Compile Remove="Models\ChatMessage.cs" />
-    <Compile Remove="Models\ChatUser.cs" />
-    <Compile Remove="Models\IIndexable.cs" />
-    <Compile Remove="Models\MessageEventArgs.cs" />
-    <Compile Remove="Models\PresenceEventArgs.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.Azure.DocumentDB.Core" Version="1.9.1" />
     <PackageReference Include="MvvmCross" Version="6.1.2" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
     <PackageReference Include="PubnubPCL" Version="4.0.18" />
+    <PackageReference Include="Realm.Database" Version="3.1.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Framework\PE.Framework\PE.Framework.csproj" />
+    <ProjectReference Include="..\Framework\PE.Provider.Data.Realm\PE.Provider.Data.Realm.csproj" />
     <ProjectReference Include="..\Plugins\Dialogs\PE.Plugins.Dialogs\PE.Plugins.Dialogs.csproj" />
-    <ProjectReference Include="..\Plugins\LocalStorage\PE.Plugins.LocalStorage\PE.Plugins.LocalStorage.csproj" />
     <ProjectReference Include="..\Plugins\PubnubChat\PE.Plugins.PubnubChat\PE.Plugins.PubnubChat.csproj" />
     <ProjectReference Include="..\Plugins\Validation\PE.Plugins.Validation\PE.Plugins.Validation.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Extensions\" />
-    <Folder Include="Models\" />
   </ItemGroup>
 
 </Project>

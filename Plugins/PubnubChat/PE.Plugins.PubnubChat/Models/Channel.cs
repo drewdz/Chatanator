@@ -5,10 +5,10 @@ using System.Linq;
 
 namespace PE.Plugins.PubnubChat.Models
 {
-    public enum ChannelType
+    public enum ChannelType : int
     {
-        Individual,
-        Group
+        Individual = 0,
+        Group= 1
     }
 
     public class Channel : IIndexable
@@ -47,7 +47,7 @@ namespace PE.Plugins.PubnubChat.Models
         /// When last a message was posted
         /// </summary>
         [JsonIgnore]
-        public DateTime LastActivity { get; set; } = DateTime.MinValue;
+        public DateTimeOffset LastActivity { get; set; } = DateTimeOffset.MinValue;
 
         [JsonIgnore]
         public string UsersKey
@@ -59,7 +59,7 @@ namespace PE.Plugins.PubnubChat.Models
                 string users = string.Empty;
                 foreach (var s in list)
                 {
-                    users += s;
+                    users += (string.IsNullOrEmpty(users)) ? s : "," + s;
                 }
                 return users;
             }

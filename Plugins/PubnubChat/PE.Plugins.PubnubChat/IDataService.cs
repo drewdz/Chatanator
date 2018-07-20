@@ -5,23 +5,17 @@ using System.Threading.Tasks;
 
 namespace PE.Plugins.PubnubChat
 {
-    public interface IDataService
-    {
-        Task<List<ChatUser>> GetChatUsersAsync();
+    //public interface IDataService
+    //{
+    //    void Add<TItem>(TItem item);
 
-        Task<List<Channel>> GetChannelsAsync();
+    //    void AddAll<TItem>(IEnumerable<TItem> items);
 
-        Task<List<ChannelHistory>> GetChannelHistoryAsync();
+    //    void Delete<TItem>(TItem item);
 
-        Task AddAsync<TItem>(TItem item);
+    //    void DeleteAll<TItem>(IEnumerable<TItem> items);
 
-        Task AddAsync<TItem>(IEnumerable<TItem> items);
+    //    void Update<TItem>(TItem item);
 
-        Task DeleteAsync<TItem>(TItem item) where TItem : IIndexable;
-
-        Task DeleteAsync<TItem>(IEnumerable<TItem> items) where TItem : IIndexable;
-
-        Task UpdateAsync<TItem>(TItem item) where TItem : IIndexable;
-
-    }
+    //}
 }

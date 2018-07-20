@@ -1,13 +1,17 @@
-﻿using PE.Plugins.PubnubChat.Models;
+﻿using Chatanator.Core.Extensions;
 using Chatanator.Core.Services;
+
 using MvvmCross.Commands;
 using MvvmCross.Navigation;
 using MvvmCross.ViewModels;
+
+using PE.Plugins.PubnubChat;
+using PE.Plugins.PubnubChat.Models;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using PE.Plugins.PubnubChat;
 
 namespace Chatanator.Core.ViewModels
 {
@@ -18,7 +22,7 @@ namespace Chatanator.Core.ViewModels
         private readonly IChatService _ChatService;
         private readonly IUserService _UserService;
         private readonly IMvxNavigationService _NavigationService;
-        private readonly ICosmosDataService _DataService;
+        private readonly Services.IDataService _DataService;
 
         private Channel _Channel;
         private List<ChatUser> _ChannelUsers;
@@ -32,7 +36,7 @@ namespace Chatanator.Core.ViewModels
 
         #region Constructors
 
-        public BasicChatViewModel(IChatService chatService, IUserService userService, IMvxNavigationService navigationService, ICosmosDataService dataService)
+        public BasicChatViewModel(IChatService chatService, IUserService userService, IMvxNavigationService navigationService, Services.IDataService dataService)
         {
             _UserService = userService;
             _NavigationService = navigationService;
@@ -155,7 +159,7 @@ namespace Chatanator.Core.ViewModels
             get => _SendCommand ?? new MvxCommand(() =>
             {
                 if (!Online || string.IsNullOrEmpty(Message)) return;
-                foreach (var user in _ChatService.CurrentChannel.Users)
+                foreach (var user in _Channel.Users)
                 {
                     if (user.Equals(_UserService.User.Id)) continue;
                     var message = new ChatMessage
@@ -167,7 +171,8 @@ namespace Chatanator.Core.ViewModels
                         TimeStamp = DateTime.Now.Ticks,
                         Sent = true
                     };
-                    _ChatService.Publish(_ChatService.CurrentChannel.Id, message);
+                    _ChatService.Publish(_Channel.Id, message);
+                    Messages.Add(message);
                 }
                 //  clear text
                 Message = string.Empty;
@@ -182,27 +187,38 @@ namespace Chatanator.Core.ViewModels
         {
             MvxNotifyTask.Create(async () =>
             {
-                //  check if we need to register
-                if (!_UserService.Initialized)
-                {
-                    await _NavigationService.Navigate<RegisterViewModel>();
-                    return;
-                }
+                if (_ChatService.CurrentChannel == null) return;
                 _Channel = _ChatService.CurrentChannel;
-                if (_Channel == null) return;
-                ChannelName = _Channel.Name;
-                //  get the users in this channel
-                if (_ChannelUsers == null) _ChannelUsers = new List<ChatUser>();
-                var users = await _DataService.GetChatUsersAsync();
-                foreach (var id in _Channel.Users)
-                {
-                    var user = users.FirstOrDefault(u => u.Id.Equals(id));
-                    if (user != null) _ChannelUsers.Add(user);
-                }
-                //  make sure we're subscribed to this channel
+                //  remove from group and subscribe to this channel
+                //_ChatService.RemoveFromGroup(new List<Channel> { _Channel });
                 _ChatService.Subscribe(_Channel);
+                //  channel name is the other user's name
+                if (_Channel.ChannelType == ChannelType.Individual)
+                {
+                    var id = _Channel.Users.FirstOrDefault(i => !i.Equals(_UserService.User.Id));
+                    if (!string.IsNullOrEmpty(id)) _Channel.Name = _DataService.GetChatUserById(id).ToString();
+                }
+                //  get the users in this channel
+                _ChannelUsers = _Channel.Users.Select(s => _DataService.GetChatUserById(s)).ToList();
                 //  get channel history
                 _ChatService.GetHistory(_Channel, -1);
+                //  get history for this channel
+                var channelHistory = _DataService.GetChannelHistoryByChannelId(_Channel.Id);
+                if (channelHistory != null)
+                {
+                    //  channel has been active in the last 30 days
+                    if (DateTime.Now.Subtract(new DateTime(channelHistory.TimeStamp)).TotalDays < 30) return;
+                }
+            });
+        }
+
+        public override void ViewDisappearing()
+        {
+            MvxNotifyTask.Create(async () =>
+            {
+                //  unsubscribe to the channel andd add back into group
+                //_ChatService.Unsubscribe(_Channel.Id);
+                //_ChatService.AddChannelToGroup(new List<Channel> { _Channel });
             });
         }
 

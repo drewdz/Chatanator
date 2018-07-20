@@ -124,13 +124,23 @@ namespace PE.Plugins.Validation
             Validator validatorAttribute = attribute as Validator;
             //  instantiate the validator
             if (validatorAttribute == null) throw new Exception(string.Format("Could not construct validator for attribute. {0}", attribute));
-            if (!validatorAttribute.IsValid(property.GetValue(sender)))
+            try
             {
+                if (!validatorAttribute.IsValid(property.GetValue(sender)))
+                {
+                    //  update the invalid property with the message
+                    invalid.SetValue(sender, validatorAttribute.Message);
+                    return false;
+                }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine(string.Format("*** ValidationService.ValidateProperty ({0}) - Exception: {1}", property.Name, ex));
                 //  update the invalid property with the message
                 invalid.SetValue(sender, validatorAttribute.Message);
                 return false;
             }
-            return true;
         }
 
         private PropertyInfo GetProperty<T>(object sender, Expression<Func<T>> exp)
