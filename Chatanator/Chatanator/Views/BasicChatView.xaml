@@ -54,7 +54,7 @@
 
                                 <Label
                                     Grid.Row="1"
-                                    Text="{Binding Text}"
+                                    Text="{Binding RawPayload}"
                                     TextColor="#000000"
                                     FontSize="12"/>
 

@@ -23,7 +23,12 @@
                 Text="{Binding UserInvalid}"
                 FontSize="10"
                 TextColor="Red"/>
-            
+
+            <Label
+                Text="If you can't be Batman, then be yourself."
+                FontAttributes="Italic"
+                TextColor="Gray"/>
+
             <Button
                 Text="Register"
                 Command="{Binding RegisterCommand}"/>

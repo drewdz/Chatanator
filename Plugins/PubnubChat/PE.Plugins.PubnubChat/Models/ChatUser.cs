@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 
 namespace PE.Plugins.PubnubChat.Models
 {
-    public class ChatUser : IIndexable, INotifyPropertyChanged
+    public class ChatUser : INotifyPropertyChanged
     {
         #region Events
 
@@ -16,8 +16,8 @@ namespace PE.Plugins.PubnubChat.Models
         #region Properties
 
         private string _Id;
-        [JsonProperty("id")]
-        public string Id
+        [JsonProperty]
+        public string ChatUserId
         {
             get => _Id;
             set

@@ -10,7 +10,7 @@ namespace Chatanator.Core.Models
         #region Properties
 
         [DataMember, PrimaryKey]
-        public string Id { get; set; } = Guid.NewGuid().ToString();
+        public string ChatUserId { get; set; } = Guid.NewGuid().ToString();
 
         [DataMember]
         public string FirstName { get; set; }

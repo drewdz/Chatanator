@@ -1,6 +1,6 @@
 ﻿using PE.Plugins.PubnubChat.Models;
+
 using System;
-using System.Collections.Generic;
 
 namespace PE.Plugins.PubnubChat
 {
@@ -14,7 +14,6 @@ namespace PE.Plugins.PubnubChat
         event EventHandler<PresenceEventArgs> ChannelJoined;
         event EventHandler<PresenceEventArgs> ChannelLeft;
         event EventHandler<PresenceEventArgs> ChannelTimeout;
-        event EventHandler<PresenceEventArgs> ChannelCreated;
         event EventHandler<PresenceEventArgs> ChannelState;
 
         #endregion Events
@@ -23,11 +22,7 @@ namespace PE.Plugins.PubnubChat
 
         bool Connected { get; }
 
-        Channel CurrentChannel { get; set; }
-
         bool Initialized { get; }
-
-        Channel LobbyChannel { get; }
 
         #endregion Properties
 
@@ -35,21 +30,9 @@ namespace PE.Plugins.PubnubChat
 
         void Initialize(string userId, long lastActivity = 0);
 
-        void Subscribe(Channel channel);
+        void Publish<TMessage>(TMessage message) where TMessage : BaseMessage;
 
-        void Unsubscribe(string id);
-
-        void Publish<TMessage>(string channel, TMessage message) where TMessage : BaseMessage;
-
-        void GetState(string channel = "");
-
-        void GetHistory(Channel channel, long timeStamp);
-
-        void SetState(Channel channel, ChatState state);
-
-        void AddChannelToGroup(List<Channel> channels);
-
-        void RemoveFromGroup(List<Channel> channels);
+        void GetHistory(long timeStamp);
 
         #endregion Operations
     }

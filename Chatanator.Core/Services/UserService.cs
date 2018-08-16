@@ -36,7 +36,7 @@ namespace Chatanator.Core.Services
 
         public bool Initialized
         {
-            get { return ((User != null) && !string.IsNullOrEmpty(User.Id)); }
+            get { return ((User != null) && !string.IsNullOrEmpty(User.ChatUserId)); }
         }
 
         #endregion Properties
@@ -60,7 +60,7 @@ namespace Chatanator.Core.Services
 
             if (User == null)
             {
-                User = new ChatUser { Id = string.Empty };
+                User = new ChatUser { ChatUserId = string.Empty };
             }
             else
             {

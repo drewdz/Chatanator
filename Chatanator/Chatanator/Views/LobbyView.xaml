@@ -30,8 +30,7 @@
             <ListView
                 Grid.Row="0"
                 ItemsSource="{Binding Contacts}"
-                SelectedItem="{Binding Contact}"
-                IsVisible="{Binding IsEmpty, Converter={StaticResource NotConverter}}">
+                SelectedItem="{Binding Contact}">
                 <ListView.ItemTemplate>
                     <DataTemplate>
                         <ViewCell>
@@ -53,12 +52,6 @@
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
-            <Label
-                Grid.Row="0"
-                IsVisible="{Binding IsEmpty}"
-                Text="No one has arrived yet."
-                HorizontalOptions="CenterAndExpand"
-                HorizontalTextAlignment="Center"/>
 
             <Label
                 Grid.Row="1"

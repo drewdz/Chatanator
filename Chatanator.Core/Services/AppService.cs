@@ -8,6 +8,8 @@ namespace Chatanator.Core.Services
 
         public long LastActivity { get; set; } = 0;
 
+        public string CurrentUserId { get; set; } = string.Empty;
+
         #endregion Properties
     }
 }

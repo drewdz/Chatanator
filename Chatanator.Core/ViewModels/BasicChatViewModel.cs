@@ -10,8 +10,8 @@ using PE.Plugins.PubnubChat.Models;
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Chatanator.Core.ViewModels
 {
@@ -23,25 +23,27 @@ namespace Chatanator.Core.ViewModels
         private readonly IUserService _UserService;
         private readonly IMvxNavigationService _NavigationService;
         private readonly Services.IDataService _DataService;
+        private readonly IAppService _AppService;
 
-        private Channel _Channel;
-        private List<ChatUser> _ChannelUsers;
         private long _SentTimestamp = 0;
         private long _ActivityTimestamp = 0;
         private bool _StateSent = false;
 
         private long _StateTimestamp = 0;
 
+        private string _withUser = string.Empty;
+
         #endregion Fields
 
         #region Constructors
 
-        public BasicChatViewModel(IChatService chatService, IUserService userService, IMvxNavigationService navigationService, Services.IDataService dataService)
+        public BasicChatViewModel(IChatService chatService, IUserService userService, IMvxNavigationService navigationService, Services.IDataService dataService, IAppService appService)
         {
             _UserService = userService;
             _NavigationService = navigationService;
             _ChatService = chatService;
             _DataService = dataService;
+            _AppService = appService;
 
             _ChatService.ConnectedChanged += (sender, e) =>
             {
@@ -51,58 +53,29 @@ namespace Chatanator.Core.ViewModels
             {
                 //  only interested in chat messages
                 if (!(e.Message is ChatMessage)) return;
-                //  only interested in messages on this channel
-                if (!e.Message.ChannelId.Equals(_Channel.Id)) return;
+                //  only interested in messages to/from this user
+                var newMessage = (ChatMessage)e.Message;
+                if (!newMessage.FromUser.Equals(_withUser) && !newMessage.ToUser.Equals(_withUser)) return;
                 //  now we're in business
-                var message = Messages.FirstOrDefault(mm => mm.Id.Equals(e.Message.Id));
-                var m = (ChatMessage)e.Message;
-                if (message == null)
+                var existing = Messages.FirstOrDefault(mm => mm.MessageId.Equals(e.Message.MessageId));
+                if (existing == null)
                 {
-                    message = m;
-                    Messages.Add(message);
+                    existing = newMessage;
                 }
                 else
                 {
-                    message.FromUser = m.FromUser;
-                    message.Id = m.Id;
-                    message.ShowStatus = m.ShowStatus;
-                    message.Text = m.Text;
-                    message.Type = m.Type;
-                    message.FromName = m.FromName;
-                }
-                //  get the sender if necessary
-                if (string.IsNullOrEmpty(message.FromName))
-                {
-                    if (!string.IsNullOrEmpty(message.FromUser))
-                    {
-                        var user = _ChannelUsers.FirstOrDefault(u => u.Id.Equals(message.FromUser));
-                        message.FromName = (user == null) ? "unknown" : user.Fullname;
-                    }
-                    else
-                    {
-                        message.FromName = "anonymous";
-                    }
+                    existing.FromUser = newMessage.FromUser;
+                    existing.MessageId = newMessage.MessageId;
+                    existing.ShowStatus = newMessage.ShowStatus;
+                    existing.RawPayload = newMessage.RawPayload;
+                    existing.Type = newMessage.Type;
+                    existing.ToUser = newMessage.ToUser;
                 }
 
-                message.Sent = message.FromUser.Equals(_UserService.User.Id);
-                message.Status = (message.FromUser.Equals(_UserService.User.Id)) ? MessageStatus.Send : MessageStatus.Delivered;
+                existing.Sent = existing.FromUser.Equals(_UserService.User.ChatUserId);
+                existing.Status = (existing.FromUser.Equals(_UserService.User.ChatUserId)) ? MessageStatus.Sent : MessageStatus.Delivered;
 
-                //  order messages
-                Messages = Messages.OrderByDescending(a => a.TimeStamp).ToList();
-            };
-            _ChatService.ChannelState += async (sender, e) =>
-            {
-                //  we know when we're typing
-                if (!e.Channel.Equals(_Channel.Id) || e.Uuid.Equals(_UserService.User.Id)) return;
-                //  get the user
-                var user = _ChannelUsers.FirstOrDefault(u => u.Id.Equals(e.Uuid));
-                if (user == null) return;
-                StateMessage = string.Format("{0} is {1}", user.Fullname, e.State.ToString());
-                _StateTimestamp = DateTime.Now.Ticks;
-                //  let this state expire
-                await Task.Delay(3000);
-                if ((DateTime.Now.Ticks - _StateTimestamp) < 3000) return;
-                StateMessage = string.Empty;
+                Messages.Add(existing);
             };
         }
 
@@ -110,8 +83,8 @@ namespace Chatanator.Core.ViewModels
 
         #region Properties
 
-        private List<ChatMessage> _Messages = new List<ChatMessage>();
-        public List<ChatMessage> Messages
+        private ObservableCollection<ChatMessage> _Messages = new ObservableCollection<ChatMessage>();
+        public ObservableCollection<ChatMessage> Messages
         {
             get => _Messages;
             set => SetProperty(ref _Messages, value);
@@ -128,11 +101,7 @@ namespace Chatanator.Core.ViewModels
         public string Message
         {
             get => _Message;
-            set
-            {
-                SetProperty(ref _Message, value);
-                Task.Run(() => SetTyping());
-            }
+            set => SetProperty(ref _Message, value);
         }
 
         private string _ChannelName = string.Empty;
@@ -159,21 +128,20 @@ namespace Chatanator.Core.ViewModels
             get => _SendCommand ?? new MvxCommand(() =>
             {
                 if (!Online || string.IsNullOrEmpty(Message)) return;
-                foreach (var user in _Channel.Users)
+                //  create a new message to send
+                var message = new ChatMessage()
                 {
-                    if (user.Equals(_UserService.User.Id)) continue;
-                    var message = new ChatMessage
-                    {
-                        Text = Message,
-                        FromUser = _UserService.User.Id,
-                        ChannelId = _Channel.Id,
-                        FromName = _UserService.User.Fullname,
-                        TimeStamp = DateTime.Now.Ticks,
-                        Sent = true
-                    };
-                    _ChatService.Publish(_Channel.Id, message);
-                    Messages.Add(message);
-                }
+                    RawPayload = Message,
+                    FromUser = _UserService.User.ChatUserId,
+                    ToUser = _withUser,
+                    TimeStamp = DateTime.Now.Ticks,
+                    Sent = true
+                };
+                //  save the message
+                message.Save(_DataService.Provider);
+                _ChatService.Publish(message);
+                Messages.Add(message);
+
                 //  clear text
                 Message = string.Empty;
             });
@@ -187,68 +155,24 @@ namespace Chatanator.Core.ViewModels
         {
             MvxNotifyTask.Create(async () =>
             {
-                if (_ChatService.CurrentChannel == null) return;
-                _Channel = _ChatService.CurrentChannel;
-                //  remove from group and subscribe to this channel
-                //_ChatService.RemoveFromGroup(new List<Channel> { _Channel });
-                _ChatService.Subscribe(_Channel);
-                //  channel name is the other user's name
-                if (_Channel.ChannelType == ChannelType.Individual)
+                _withUser = _AppService.CurrentUserId;
+                //  get history for this chat
+                var messages = _DataService.Provider.GetMessagesUser(_withUser);
+                if (messages != null)
                 {
-                    var id = _Channel.Users.FirstOrDefault(i => !i.Equals(_UserService.User.Id));
-                    if (!string.IsNullOrEmpty(id)) _Channel.Name = _DataService.GetChatUserById(id).ToString();
-                }
-                //  get the users in this channel
-                _ChannelUsers = _Channel.Users.Select(s => _DataService.GetChatUserById(s)).ToList();
-                //  get channel history
-                _ChatService.GetHistory(_Channel, -1);
-                //  get history for this channel
-                var channelHistory = _DataService.GetChannelHistoryByChannelId(_Channel.Id);
-                if (channelHistory != null)
-                {
-                    //  channel has been active in the last 30 days
-                    if (DateTime.Now.Subtract(new DateTime(channelHistory.TimeStamp)).TotalDays < 30) return;
+                    Messages = new ObservableCollection<ChatMessage>(messages.OrderBy(m => m.TimeStamp));
                 }
             });
         }
 
         public override void ViewDisappearing()
         {
-            MvxNotifyTask.Create(async () =>
-            {
-                //  unsubscribe to the channel andd add back into group
-                //_ChatService.Unsubscribe(_Channel.Id);
-                //_ChatService.AddChannelToGroup(new List<Channel> { _Channel });
-            });
+            _AppService.CurrentUserId = string.Empty;
         }
 
         #endregion Lifecycle
 
         #region Operations
-
-        private async void SetTyping()
-        {
-            if (!_StateSent)
-            {
-                _StateSent = true;
-                _ChatService.SetState(_Channel, ChatState.Typing);
-                _SentTimestamp = DateTime.Now.Ticks;
-            }
-            _ActivityTimestamp = DateTime.Now.Ticks;
-            await Task.Delay(1500);
-            if ((DateTime.Now.Ticks - _ActivityTimestamp) >= 1500)
-            {
-                //  we've stopped typing now
-                _ChatService.SetState(_Channel, ChatState.Waiting);
-                _StateSent = false;
-            }
-            else if ((DateTime.Now.Ticks - _SentTimestamp) >= 3000)
-            {
-                //  allow state to be resent
-                _ChatService.SetState(_Channel, ChatState.None);
-                _StateSent = false;
-            }
-        }
 
         #endregion Operations
     }
