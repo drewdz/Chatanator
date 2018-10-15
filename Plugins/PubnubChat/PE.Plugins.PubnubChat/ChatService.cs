@@ -195,6 +195,10 @@ namespace PE.Plugins.PubnubChat
 
         #endregion Init
 
+        #region Callbacks
+
+        #endregion Callbacks
+
         #region Operations
 
         public void GetHistory(long timeStamp)

@@ -105,15 +105,18 @@ namespace Chatanator.Core.ViewModels
                 }
                 IsEmpty = ((Contacts == null) || (Contacts.Count == 0));
                 //  initialize the chat service
-                _ChatService.InitializedChanged += (sender, e) =>
-                {
-                    if (!_ChatService.Initialized) return;
-                    //  get activity for recent channels since last
-                    _ChatService.GetHistory(_AppService.LastActivity);
-                };
+                _ChatService.InitializedChanged += _ChatService_InitializedChanged;
                 _ChatService.Initialize(_UserService.User.ChatUserId);
             });
         }
+
+        private void _ChatService_InitializedChanged(object sender, EventArgs e)
+        {
+            if (!_ChatService.Initialized) return;
+            _ChatService.InitializedChanged -= _ChatService_InitializedChanged;
+            //  get activity for recent channels since last
+            _ChatService.GetHistory(_AppService.LastActivity);
+        };
 
         public override void ViewDisappearing()
         {
@@ -146,6 +149,15 @@ namespace Chatanator.Core.ViewModels
 
         private void _ChatService_MessageReceived(object sender, MessageEventArgs<BaseMessage> e)
         {
+            if (e.Message is ChatMessage)
+            {
+                var message = (ChatMessage)e.Message;
+                System.Diagnostics.Debug.WriteLine(string.Format("Message received: {0}", message.RawPayload));
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine("Message received!");
+            }
         }
 
         private void _ChatService_ChannelState(object sender, PresenceEventArgs e)

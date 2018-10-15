@@ -5,7 +5,6 @@ using MvvmCross.Forms.Platforms.Android.Views;
 
 namespace Chatanator.Droid
 {
-    // No Splash Screen: To remove splash screen, remove this class and uncomment lines in MainActivity
     [Activity(
         Label = "Chatanator"
         , MainLauncher = true
