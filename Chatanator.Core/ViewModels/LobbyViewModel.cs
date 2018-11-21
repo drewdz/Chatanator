@@ -83,6 +83,13 @@ namespace Chatanator.Core.ViewModels
             set => SetProperty(ref _Username, value);
         }
 
+        private bool _ShowIt = false;
+        public bool ShowIt
+        {
+            get => _ShowIt;
+            set => SetProperty(ref _ShowIt, value);
+        }
+
         #endregion Properties
 
         #region Lifecycle
@@ -91,22 +98,30 @@ namespace Chatanator.Core.ViewModels
         {
             MvxNotifyTask.Create(async () =>
             {
-                if ((_UserService.User == null) || string.IsNullOrEmpty(_UserService.User.ChatUserId))
+                try
                 {
-                    await _NavigationService.Navigate<RegisterViewModel>();
-                    return;
+                    if ((_UserService.User == null) || string.IsNullOrEmpty(_UserService.User.ChatUserId))
+                    {
+                        await _NavigationService.Navigate<RegisterViewModel>();
+                        return;
+                    }
+                    Username = _UserService.User.ToString();
+                    //  get a list of contacts
+                    var contacts = _DataService.GetChatUsers();
+                    if (contacts != null)
+                    {
+                        Contacts = contacts.Where(c => !c.ChatUserId.Equals(_UserService.User.ChatUserId)).ToList();
+                    }
+                    IsEmpty = ((Contacts == null) || (Contacts.Count == 0));
+                    //  initialize the chat service
+                    _ChatService.InitializedChanged += _ChatService_InitializedChanged;
+                    _ChatService.Initialize(_UserService.User.ChatUserId);
                 }
-                Username = _UserService.User.ToString();
-                //  get a list of contacts
-                var contacts = _DataService.GetChatUsers();
-                if (contacts != null)
+                catch (Exception ex)
                 {
-                    Contacts = contacts.Where(c => !c.ChatUserId.Equals(_UserService.User.ChatUserId)).ToList();
+                    System.Diagnostics.Debug.WriteLine($"*** LobyViewModel.ViewAppeared - Exception: {ex}");
                 }
-                IsEmpty = ((Contacts == null) || (Contacts.Count == 0));
-                //  initialize the chat service
-                _ChatService.InitializedChanged += _ChatService_InitializedChanged;
-                _ChatService.Initialize(_UserService.User.ChatUserId);
+                ShowIt = !ShowIt;
             });
         }
 
@@ -116,7 +131,7 @@ namespace Chatanator.Core.ViewModels
             _ChatService.InitializedChanged -= _ChatService_InitializedChanged;
             //  get activity for recent channels since last
             _ChatService.GetHistory(_AppService.LastActivity);
-        };
+        }
 
         public override void ViewDisappearing()
         {
